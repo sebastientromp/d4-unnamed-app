@@ -1,0 +1,22 @@
+<div class="fiery-theme container">
+	<main-app-main-navigation [menuItems]="menuItems" [selectedModule]="selectedModule"></main-app-main-navigation>
+	<div class="main">
+		<main-app-top-bar></main-app-top-bar>
+		<div class="content-container">
+			<div class="content">
+				<ng-content></ng-content>
+			</div>
+			<div class="ads"></div>
+		</div>
+	</div>
+
+	<div class="resize horizontal top" (mousedown)="dragResize($event, 'Top')"></div>
+	<div class="resize vertical left" (mousedown)="dragResize($event, 'Left')"></div>
+	<div class="resize vertical right" (mousedown)="dragResize($event, 'Right')"></div>
+	<div class="resize horizontal bottom" (mousedown)="dragResize($event, 'Bottom')"></div>
+
+	<div class="resize corner top-left" (mousedown)="dragResize($event, 'TopLeft')"></div>
+	<div class="resize corner top-right" (mousedown)="dragResize($event, 'TopRight')"></div>
+	<div class="resize corner bottom-left" (mousedown)="dragResize($event, 'BottomLeft')"></div>
+	<div class="resize corner bottom-right" (mousedown)="dragResize($event, 'BottomRight')"></div>
+</div>

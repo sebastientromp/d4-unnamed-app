@@ -1,0 +1,25 @@
+.control {
+	position: relative;
+	width: 30px;
+	height: 30px;
+	--icon-color: var(--color-2);
+	background-color: transparent;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	border: 0;
+
+	svg {
+		width: 100%;
+		height: 100%;
+		flex: 0 0 auto;
+		pointer-events: none;
+		user-select: none;
+	}
+
+	&:hover {
+		background: var(--color-2);
+		--icon-color: var(--color-dark-2);
+	}
+}

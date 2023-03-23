@@ -1,0 +1,47 @@
+{
+	"name": "companion-windows-main",
+	"$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+	"projectType": "library",
+	"sourceRoot": "libs/companion/windows/main/src",
+	"prefix": "main-app",
+	"targets": {
+		"build": {
+			"executor": "@nrwl/angular:ng-packagr-lite",
+			"outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+			"options": {
+				"project": "libs/companion/windows/main/ng-package.json"
+			},
+			"configurations": {
+				"production": {
+					"tsConfig": "libs/companion/windows/main/tsconfig.lib.prod.json"
+				},
+				"development": {
+					"tsConfig": "libs/companion/windows/main/tsconfig.lib.json"
+				}
+			},
+			"defaultConfiguration": "production"
+		},
+		"test": {
+			"executor": "@nrwl/jest:jest",
+			"outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+			"options": {
+				"jestConfig": "libs/companion/windows/main/jest.config.ts",
+				"passWithNoTests": true
+			},
+			"configurations": {
+				"ci": {
+					"ci": true,
+					"codeCoverage": true
+				}
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"outputs": ["{options.outputFile}"],
+			"options": {
+				"lintFilePatterns": ["libs/companion/windows/main/**/*.ts", "libs/companion/windows/main/**/*.html"]
+			}
+		}
+	},
+	"tags": []
+}

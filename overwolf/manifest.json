@@ -1,0 +1,127 @@
+{
+	"manifest_version": 1,
+	"type": "WebApp",
+	"meta": {
+		"name": "D4 Chaos",
+		"author": "Sébastien Tromp",
+		"version": "@app-version@",
+		"minimum-overwolf-version": "0.141.0.13",
+		"description": "A Diablo 4 companion app",
+		"dock_button_title": "D4 Chaos",
+		"icon": "IconMouseOver.png",
+		"icon_gray": "IconMouseNormal.png",
+		"launcher_icon": "launcher_icon_2.ico"
+	},
+	"permissions": [
+		"Logging",
+		"GameInfo",
+		"FileSystem",
+		"Extensions",
+		"Profile",
+		"Hotkeys",
+		"DesktopStreaming",
+		"Streaming",
+		"Clipboard",
+		"Tray"
+	],
+	"disable_dockbutton": false,
+	"hide_from_store": false,
+	"data": {
+		"start_window": "BackgroundWindow",
+		"windows": {
+			"BackgroundWindow": {
+				"file": "Files/index.html",
+				"transparent": true,
+				"clickthrough": true,
+				"resizable": false,
+				"show_in_taskbar": false,
+				"is_background_page": true,
+				"size": { "width": 0, "height": 0 },
+				"start_position": { "top": 0, "left": 0 },
+				"grab_keyboard_focus": false,
+				"grab_focus_on_desktop": false,
+				"block_top_window_navigation": true
+			},
+			"MainOverlayWindow": {
+				"file": "Files/index.html",
+				"transparent": true,
+				"resizable": true,
+				"show_in_taskbar": true,
+				"size": { "width": 1400, "height": 780 },
+				"min_size": { "width": 1400, "height": 780 },
+				"block_top_window_navigation": true,
+				"popup_blocker": true,
+				"mute": true
+			},
+			"MainWindow": {
+				"file": "Files/index.html",
+				"transparent": true,
+				"resizable": true,
+				"show_in_taskbar": true,
+				"native_window": true,
+				"use_os_windowing": true,
+				"desktop_only": true,
+				"topmost": false,
+				"disable_hardware_acceleration": true,
+				"size": { "width": 1400, "height": 780 },
+				"min_size": { "width": 1400, "height": 780 },
+				"block_top_window_navigation": true,
+				"popup_blocker": true,
+				"mute": true
+			},
+			"FullScreenOverlaysWindow": {
+				"file": "Files/index.html",
+				"transparent": true,
+				"resizable": false,
+				"show_in_taskbar": false,
+				"size": { "width": 300, "height": 720 },
+				"start_position": { "top": 0, "left": 0 },
+				"grab_keyboard_focus": false,
+				"grab_focus_on_desktop": false,
+				"block_top_window_navigation": true,
+				"in_game_only": true
+			}
+		},
+		"game_targeting": {
+			"type": "dedicated",
+			"game_ids": [22700]
+		},
+		"force_browser": "user",
+		"game_events": [22700],
+		"launch_events": [
+			{
+				"event": "GameLaunch",
+				"event_data": {
+					"game_ids": [22700]
+				},
+				"start_minimized": false
+			}
+		],
+		"protocol_override_domains": {
+			"googlesyndication": "http"
+		},
+		"externally_connectable": {
+			"matches": [
+				"https://localhost",
+				"http://*.overwolf.com",
+				"https://*.overwolf.com",
+
+				"https://*.execute-api.us-west-2.amazonaws.com",
+				"http://*.amazonaws.com",
+				"https://*.amazonaws.com",
+				"https://*.lambda-url.us-west-2.on.aws",
+				"https://www.googletagmanager.com"
+			]
+		},
+		"hotkeys": {
+			"live-map": {
+				"title": "Show transparent map",
+				"action-type": "custom",
+				"default": "Alt+H",
+				"passthrough": true
+			}
+		},
+		"process_name": "D4 Chaos",
+		"disable_cleanup": true
+	}
+}

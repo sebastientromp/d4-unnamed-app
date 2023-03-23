@@ -1,0 +1,22 @@
+<nav class="navigation">
+	<button class="menu-item logo" *ngIf="showLogo">
+		<img class="icon" src="https://s3.us-west-2.amazonaws.com/static.d4chaos.gg/app/common/logo.png" />
+		<div class="text">
+			<div class="text-background"></div>
+			<div class="menu-header">D4 Chaos</div>
+		</div>
+	</button>
+	<button
+		class="menu-item"
+		*ngFor="let item of menuItems"
+		[ngClass]="{ selected: selectedModule === item.id }"
+		(click)="moduleClicked(item.id)"
+	>
+		<div class="icon" *ngIf="item.iconSvg" [inlineSVG]="item.iconSvg"></div>
+		<div class="icon" *ngIf="!item.iconSvg && item.name">{{ item.name }}</div>
+		<div class="text">
+			<div class="text-background"></div>
+			<div class="menu-header">{{ item.name }}</div>
+		</div>
+	</button>
+</nav>

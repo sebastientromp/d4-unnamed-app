@@ -1,0 +1,43 @@
+.fiery-theme {
+	--color-1: #ff5b57;
+	--color-2: #ff2f2c;
+	--color-3: #e62924;
+	--color-4: #c52420;
+	--color-5: #a4201c;
+	--color-6: #831b18;
+	--color-7: #611714;
+
+	--color-accent-1: #f5a623;
+	--color-accent-2: #f8e71c;
+	--color-accent-3: #8b572a;
+
+	// Neutral and titles
+	--color-common-1: #d9c3ab;
+	--color-common-2: #ffb948;
+
+	// Dark for backgrounds, dims, etc.
+	--color-dark-1: #7e7f82;
+	--color-dark-2: #1a1c1f;
+
+	--color-1-rgb: 255, 91, 87;
+	--color-2-rgb: 255, 47, 44;
+	--color-3-rgb: 230, 41, 36;
+	--color-4-rgb: 197, 36, 32;
+	--color-5-rgb: 164, 32, 28;
+	--color-6-rgb: 131, 27, 24;
+	--color-7-rgb: 97, 23, 20;
+	--color-accent-1-rgb: 245, 166, 35;
+	--color-accent-2-rgb: 248, 231, 28;
+	--color-accent-3-rgb: 139, 87, 42;
+	--color-common-1-rgb: 217, 195, 171;
+	--color-common-2-rgb: 255, 185, 72;
+	--color-dark-1-rgb: 126, 127, 130;
+	--color-dark-2-rgb: 26, 28, 31;
+
+	--window-background-image: radial-gradient(
+		47vw at 50% 70%,
+		rgba(var(--color-dark-1-rgb), 0.2) 0%,
+		rgba(var(--color-dark-2-rgb), 1) 100%
+	);
+	//url(https://s3.us-west-2.amazonaws.com/static.d4chaos.gg/app/common/background.png);
+}
