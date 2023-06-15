@@ -1,11 +1,15 @@
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { CompanionBackgroundModule } from '@main-app/companion/background';
 import { CompanionOverlayComponent } from './companion-overlay.component';
+import { SessionTrackerWidgetWrapperComponent } from './widgets/session-tracker/session-tracker-widget-wrapper.component';
+import { SessionTrackerWidgetComponent } from './widgets/session-tracker/session-tracker-widget.component';
 
-const components = [CompanionOverlayComponent];
+const components = [CompanionOverlayComponent, SessionTrackerWidgetWrapperComponent, SessionTrackerWidgetComponent];
 
 @NgModule({
-	imports: [CommonModule],
+	imports: [CommonModule, DragDropModule, CompanionBackgroundModule],
 	declarations: components,
 	exports: components,
 })

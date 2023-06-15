@@ -184,6 +184,19 @@ export class OverwolfService {
 		});
 	}
 
+	public async maximize(windowId: string): Promise<void> {
+		return new Promise<void>((resolve) => {
+			try {
+				overwolf.windows.maximize(windowId, (res) => {
+					resolve();
+				});
+			} catch (e) {
+				console.error('Exception while trying to maximize', windowId, e);
+				resolve();
+			}
+		});
+	}
+
 	public async changeWindowSize(windowId: string, width: number, height: number): Promise<void> {
 		return new Promise<void>((resolve) => {
 			try {

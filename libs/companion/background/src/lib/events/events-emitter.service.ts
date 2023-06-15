@@ -10,7 +10,6 @@ export class EventsEmitterService {
 
 	public async init(): Promise<void> {
 		console.log('init events emitter service');
-		await this.ow.setRequiredFeatures(['match_info', 'location']);
 		overwolf.games.events.onNewEvents.addListener((events) => {
 			for (const event of events.events) {
 				this.processNewGepEvent(event);
@@ -19,6 +18,10 @@ export class EventsEmitterService {
 		overwolf.games.events.onInfoUpdates2.addListener((event) => {
 			this.processNewGepInfoUpdates(event);
 		});
+		overwolf.games.events.getInfo((event) => {
+			this.processGepGameInfo(event);
+		});
+		await this.ow.setRequiredFeatures(['match_info', 'location']);
 	}
 
 	private processNewGepEvent(event: overwolf.games.events.GameEvent) {
@@ -35,5 +38,9 @@ export class EventsEmitterService {
 
 	private processNewGepInfoUpdates(event: any) {
 		console.debug('[events-emitter] received info update', event);
+	}
+
+	private processGepGameInfo(event: any) {
+		console.debug('[events-emitter] received info', event);
 	}
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { OverwolfService } from '@main-app/companion/common';
+import { OverwolfService, sleep } from '@main-app/companion/common';
 import { AppStoreService } from './app-store.service';
 
 @Injectable()
@@ -20,9 +20,10 @@ export class AppStoreFacadeService {
 
 	private async init() {
 		this.store = this.ow.getMainWindow()?.appStore;
-		if (!this.store) {
+		while (!this.store) {
 			console.warn('could not retrieve store from main window');
-			setTimeout(() => this.init(), 200);
+			console.debug(this.ow.getMainWindow());
+			await sleep(200);
 		}
 	}
 

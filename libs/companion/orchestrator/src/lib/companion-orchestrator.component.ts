@@ -5,12 +5,11 @@ import {
 	Component,
 	HostListener,
 	OnDestroy,
-	ViewRef,
 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { OverwolfService } from '@main-app/companion/common';
 import { Observable, Subject, from } from 'rxjs';
-import { distinctUntilChanged, map, takeUntil, tap } from 'rxjs/operators';
+import { distinctUntilChanged, map, tap } from 'rxjs/operators';
 
 @Component({
 	selector: 'main-app-companion-orchestrator',
@@ -19,7 +18,7 @@ import { distinctUntilChanged, map, takeUntil, tap } from 'rxjs/operators';
 		<ng-container [ngSwitch]="currentWindowName">
 			<main-app-companion-background *ngSwitchCase="'BackgroundWindow'"></main-app-companion-background>
 			<main-app-companion-main *ngSwitchCase="'MainWindow'"></main-app-companion-main>
-			<main-app-companion-overlay *ngSwitchCase="'FullScreenOverlayshWindow'"></main-app-companion-overlay>
+			<main-app-companion-overlay *ngSwitchCase="'FullScreenOverlaysWindow'"></main-app-companion-overlay>
 		</ng-container>
 	</ng-container>`,
 	changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,16 +43,9 @@ export class CompanionOrchestratorComponent implements AfterContentInit, OnDestr
 	ngAfterContentInit(): void {
 		console.debug('init orchestrator');
 		this.currentWindowName$ = from(this.ow.getCurrentWindow()).pipe(
+			tap((currentWindow) => console.debug('current window', currentWindow)),
 			map((currentWindow) => this.mapWindowName(currentWindow?.name)),
 			distinctUntilChanged(),
-			tap(() =>
-				setTimeout(() => {
-					if (!(this.cdr as ViewRef)?.destroyed) {
-						this.cdr.detectChanges();
-					}
-				}, 0),
-			),
-			takeUntil(this.destroyed$),
 		);
 		this.currentWindowName$.subscribe((name) => {
 			const humanFriendlyName = this.buildHumanFriendlyName(name);
