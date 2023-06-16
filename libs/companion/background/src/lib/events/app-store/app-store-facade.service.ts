@@ -14,6 +14,7 @@ export class AppStoreFacadeService {
 	public inMatch$$ = () => this.store.inMatch$$;
 	public totalTimeSpentInMatchInMiilis$$ = () => this.store.totalTimeSpentInMatchInMiilis$$;
 	public currentGold$$ = () => this.store.currentGold$$;
+	public gameSession$$ = () => this.store.gameSession$$;
 
 	public async initComplete(): Promise<void> {
 		await this.waitForStoreInstance();

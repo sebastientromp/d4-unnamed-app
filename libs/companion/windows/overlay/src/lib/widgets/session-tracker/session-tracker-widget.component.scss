@@ -40,29 +40,5 @@
 				margin-left: auto;
 			}
 		}
-
-		.content {
-			display: flex;
-			flex-direction: column;
-			padding-left: 20px;
-			color: var(--color-common-1);
-
-			.stat {
-				display: flex;
-				align-items: center;
-				margin-bottom: 5px;
-				height: 30px;
-				position: relative;
-
-				.icon {
-					margin-right: 5px;
-					height: 100%;
-				}
-
-				.value-per-hour {
-					margin-left: auto;
-				}
-			}
-		}
 	}
 }

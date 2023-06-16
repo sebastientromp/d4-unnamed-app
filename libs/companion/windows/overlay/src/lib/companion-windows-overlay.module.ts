@@ -4,10 +4,16 @@ import { NgModule } from '@angular/core';
 import { CompanionBackgroundModule } from '@main-app/companion/background';
 import { CompanionWindowsCommonModule } from '@main-app/companion/windows/common';
 import { CompanionOverlayComponent } from './companion-overlay.component';
+import { SessionTrackerSectionContentComponent } from './widgets/session-tracker/session-tracker-section-content.component';
 import { SessionTrackerWidgetWrapperComponent } from './widgets/session-tracker/session-tracker-widget-wrapper.component';
 import { SessionTrackerWidgetComponent } from './widgets/session-tracker/session-tracker-widget.component';
 
-const components = [CompanionOverlayComponent, SessionTrackerWidgetWrapperComponent, SessionTrackerWidgetComponent];
+const components = [
+	CompanionOverlayComponent,
+	SessionTrackerWidgetWrapperComponent,
+	SessionTrackerWidgetComponent,
+	SessionTrackerSectionContentComponent,
+];
 
 @NgModule({
 	imports: [CommonModule, DragDropModule, CompanionBackgroundModule, CompanionWindowsCommonModule],

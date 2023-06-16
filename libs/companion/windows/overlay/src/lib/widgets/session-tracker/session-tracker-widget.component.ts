@@ -9,8 +9,10 @@ import {
 } from '@angular/core';
 import { AppStoreFacadeService } from '@main-app/companion/background';
 import { LocalStorageService, OverwolfService } from '@main-app/companion/common';
-import { BehaviorSubject, Observable, combineLatest, filter, sampleTime } from 'rxjs';
+import { GameSessionLocationEvent } from 'libs/companion/background/src/lib/session-tracker/game-session.model';
+import { Observable, combineLatest, filter, map } from 'rxjs';
 import { AbstractWidgetWrapperComponent } from '../_widget-wrapper.component';
+import { SessionTrackerSection } from './session-tracker-section.model';
 
 @Component({
 	selector: 'session-tracker-widget',
@@ -30,17 +32,12 @@ import { AbstractWidgetWrapperComponent } from '../_widget-wrapper.component';
 			</div>
 		</div>
 		<div class="session-recap">
-			<div class="overview">
-				<div class="header">
-					<div class="text">Overview</div>
-					<div class="time">{{ totalDuration$ | async }}</div>
-				</div>
-				<div class="content">
-					<div class="stat gold">
-						<img class="icon" src="assets/images/gold.webp" />
-						<div class="value">{{ totalGoldEarned$$ | async }}</div>
-						<div class="value-per-hour">{{ goldEarnedPerMinute$ | async }}</div>
-					</div>
+			<session-tracker-section-content class="overview" [title]="'Overview'" [section]="overview$ | async">
+			</session-tracker-section-content>
+			<div class="details">
+				<div class="section" *ngFor="let section of sections$ | async">
+					<session-tracker-section-content class="overview" [title]="section.title" [section]="section">
+					</session-tracker-section-content>
 				</div>
 			</div>
 		</div>
@@ -51,12 +48,10 @@ export class SessionTrackerWidgetComponent
 	extends AbstractWidgetWrapperComponent
 	implements AfterContentInit, AfterViewInit
 {
-	totalDuration$!: Observable<string>;
-	totalGoldEarned$$ = new BehaviorSubject<number>(0);
-	goldEarnedPerMinute$!: Observable<string>;
+	sections$!: Observable<readonly GameSessionLocationEvent[]>;
+	overview$!: Observable<SessionTrackerSection>;
 
 	private windowId!: string;
-	private currentGold$$ = new BehaviorSubject<number | null>(null);
 
 	protected defaultPositionLeftProvider = (gameWidth: number, gameHeight: number, dpi: number) => gameWidth - 200;
 	protected defaultPositionTopProvider = (gameWidth: number, gameHeight: number, dpi: number) => gameHeight - 200;
@@ -74,46 +69,38 @@ export class SessionTrackerWidgetComponent
 	}
 
 	async ngAfterContentInit(): Promise<void> {
-		this.totalDuration$ = this.store.totalTimeSpentInMatchInMiilis$$().pipe(
-			sampleTime(1000),
-			this.mapData((durationInMillis) => {
-				return formatMilliseconds(durationInMillis);
-			}),
-		);
-		this.store
-			.currentGold$$()
+		this.sections$ = this.store.gameSession$$().pipe(this.mapData((session) => session?.locationEvents ?? []));
+		const totalGoldEarned$ = this.store
+			.gameSession$$()
 			.pipe(
-				filter((gold) => gold != null),
-				this.mapData((gold) => gold as number),
-			)
-			.subscribe((gold) => {
-				// console.debug('[session-tracker] updating gold', gold);
-				if (this.totalGoldEarned$$.getValue() == null) {
-					this.currentGold$$.next(gold);
-				} else {
-					const earned = gold - (this.currentGold$$.getValue() as number);
-					this.currentGold$$.next(gold);
-					if (earned > 0) {
-						this.totalGoldEarned$$.next(this.totalGoldEarned$$.getValue() + earned);
-					} else {
-						// console.debug(
-						// 	'[session-tracker] ignoring negative gold update',
-						// 	gold,
-						// 	this.totalGoldEarned$$.getValue(),
-						// );
-					}
-				}
-			});
-		this.goldEarnedPerMinute$ = combineLatest([
-			this.totalGoldEarned$$,
-			this.store.totalTimeSpentInMatchInMiilis$$(),
-		]).pipe(
+				this.mapData(
+					(session) => session?.locationEvents.map((loc) => loc.goldEarned).reduce((a, b) => a + b, 0) ?? 0,
+				),
+			);
+		const totalTimeSpentInClosedLocs$ = this.store.gameSession$$().pipe(
+			this.mapData(
+				(session) =>
+					session?.locationEvents
+						.filter((loc) => loc.exitTimestamp != null)
+						.map((loc) => (loc.exitTimestamp as number) - loc.enterTimestamp)
+						.reduce((a, b) => a + b, 0) ?? 0,
+			),
+		);
+		const totalTimeInCurrentLoc$ = this.store.gameSession$$().pipe(
+			map((session) => session?.locationEvents.find((loc) => loc.exitTimestamp == null)),
+			filter((loc) => !!loc),
+			this.mapData((loc) => Date.now() - (loc?.enterTimestamp as number)),
+		);
+		const totalTimeSpent$ = combineLatest([totalTimeSpentInClosedLocs$, totalTimeInCurrentLoc$]).pipe(
+			this.mapData(([closed, current]) => closed + current),
+		);
+		this.overview$ = combineLatest([totalGoldEarned$, totalTimeSpent$]).pipe(
 			this.mapData(([gold, duration]) => {
-				if (gold == null || duration == null) {
-					return '0';
-				}
-				const goldPerMinute = (gold / duration) * 60000;
-				return `${Math.round(goldPerMinute).toLocaleString()} / min`;
+				return {
+					title: 'Overview',
+					goldEarned: gold,
+					timeSpentInMillis: duration,
+				} as SessionTrackerSection;
 			}),
 		);
 	}

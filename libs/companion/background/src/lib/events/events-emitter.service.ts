@@ -7,6 +7,7 @@ import { MockEventsService } from './mock-events.service';
 export class EventsEmitterService {
 	public inMatch$$ = new BehaviorSubject<boolean>(true);
 	public currentGold$$ = new BehaviorSubject<number | null>(null);
+	public currentLocation$$ = new BehaviorSubject<string | null>(null);
 
 	constructor(private readonly ow: OverwolfService, private readonly mockEvents: MockEventsService) {}
 
@@ -43,6 +44,9 @@ export class EventsEmitterService {
 				break;
 			case 'current_gold':
 				this.currentGold$$.next(parseInt(event.data));
+				break;
+			case 'current_location':
+				this.currentGold$$.next(event.data);
 				break;
 		}
 	}

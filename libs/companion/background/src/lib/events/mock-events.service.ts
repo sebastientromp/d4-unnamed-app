@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { pickRandom } from '@main-app/companion/common';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable()
@@ -7,6 +8,22 @@ export class MockEventsService {
 
 	constructor() {
 		this.initGold();
+		this.initLocation();
+	}
+
+	private async initLocation() {
+		const locations = ['kyovashad', 'desolate_highliands', 'derelict_lodge', 'sarkova_pass'];
+		const generateNewLocation = () => {
+			const loc = pickRandom(locations);
+			this.events$$.next([
+				{
+					name: 'current_location',
+					data: loc as string,
+				},
+			]);
+		};
+		(window as any)['newLocation'] = generateNewLocation;
+		generateNewLocation();
 	}
 
 	private async initGold() {
