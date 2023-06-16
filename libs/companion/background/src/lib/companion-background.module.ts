@@ -5,6 +5,7 @@ import { CompanionBackgroundService } from './companion-background.service';
 import { AppStoreFacadeService } from './events/app-store/app-store-facade.service';
 import { AppStoreService } from './events/app-store/app-store.service';
 import { EventsEmitterService } from './events/events-emitter.service';
+import { MockEventsService } from './events/mock-events.service';
 import { GameStateService } from './game-state/game-state.service';
 import { OverlayWindowControllerService } from './window/overlay-window-controller.service';
 
@@ -19,6 +20,7 @@ const components = [CompanionBackgroundComponent];
 		OverlayWindowControllerService,
 		GameStateService,
 		EventsEmitterService,
+		MockEventsService,
 	],
 	declarations: components,
 	exports: components,

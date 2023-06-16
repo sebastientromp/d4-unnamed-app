@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
 import { OverwolfService } from '@main-app/companion/common';
 import { BehaviorSubject } from 'rxjs';
+import { MockEventsService } from './mock-events.service';
 
 @Injectable()
 export class EventsEmitterService {
-	public inMatch$$ = new BehaviorSubject<boolean>(false);
+	public inMatch$$ = new BehaviorSubject<boolean>(true);
+	public currentGold$$ = new BehaviorSubject<number | null>(null);
 
-	constructor(private readonly ow: OverwolfService) {}
+	constructor(private readonly ow: OverwolfService, private readonly mockEvents: MockEventsService) {}
 
 	public async init(): Promise<void> {
 		console.log('init events emitter service');
@@ -22,6 +24,12 @@ export class EventsEmitterService {
 			this.processGepGameInfo(event);
 		});
 		await this.ow.setRequiredFeatures(['match_info', 'location']);
+
+		this.mockEvents.events$$.subscribe((events) => {
+			for (const event of events) {
+				this.processNewGepEvent(event);
+			}
+		});
 	}
 
 	private processNewGepEvent(event: overwolf.games.events.GameEvent) {
@@ -32,6 +40,9 @@ export class EventsEmitterService {
 				break;
 			case 'match_end':
 				this.inMatch$$.next(false);
+				break;
+			case 'current_gold':
+				this.currentGold$$.next(parseInt(event.data));
 				break;
 		}
 	}

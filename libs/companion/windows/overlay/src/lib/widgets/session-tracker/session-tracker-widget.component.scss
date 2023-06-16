@@ -2,5 +2,67 @@
 	width: 250px;
 	height: 500px;
 	border-radius: 15px;
-	background: #1e1e1e;
+
+	.background {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background-size: cover;
+		background-repeat: no-repeat;
+		background: var(--color-dark-2);
+		z-index: -1;
+	}
+
+	.controls {
+		display: flex;
+		align-items: center;
+		padding-left: 10px;
+
+		.buttons {
+			margin-left: auto;
+			align-items: center;
+		}
+	}
+
+	.session-recap {
+		display: flex;
+		flex-direction: column;
+		padding: 10px;
+
+		.header {
+			display: flex;
+			align-items: center;
+			margin-bottom: 5px;
+
+			.time {
+				margin-left: auto;
+			}
+		}
+
+		.content {
+			display: flex;
+			flex-direction: column;
+			padding-left: 20px;
+			color: var(--color-common-1);
+
+			.stat {
+				display: flex;
+				align-items: center;
+				margin-bottom: 5px;
+				height: 30px;
+				position: relative;
+
+				.icon {
+					margin-right: 5px;
+					height: 100%;
+				}
+
+				.value-per-hour {
+					margin-left: auto;
+				}
+			}
+		}
+	}
 }

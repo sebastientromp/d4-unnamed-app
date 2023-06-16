@@ -12,6 +12,7 @@
 	--color-accent-3: #8b572a;
 
 	// Neutral and titles
+	--color-text-1: #f5efef;
 	--color-common-1: #d9c3ab;
 	--color-common-2: #ffb948;
 
@@ -35,9 +36,9 @@
 	--color-dark-2-rgb: 26, 28, 31;
 
 	--window-background-image: radial-gradient(
-		47vw at 50% 70%,
-		rgba(var(--color-dark-1-rgb), 0.2) 0%,
-		rgba(var(--color-dark-2-rgb), 1) 100%
-	);
-	//url(https://s3.us-west-2.amazonaws.com/static.d4chaos.gg/app/common/background.png);
+			47vw at 50% 70%,
+			rgba(var(--color-dark-1-rgb), 0.7) 0%,
+			rgba(var(--color-dark-2-rgb), 1) 100%
+		),
+		url(https://s3.us-west-2.amazonaws.com/static.d4chaos.gg/app/common/background.png);
 }

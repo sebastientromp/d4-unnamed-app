@@ -5,7 +5,7 @@ import { OverwolfService } from '@main-app/companion/common';
 	selector: 'main-app-companion-overlay',
 	styleUrls: ['./companion-overlay.component.scss'],
 	template: `
-		<div id="container" class="full-screen-overlays drag-boundary overlay-container-parent">
+		<div id="container" class="full-screen-overlays drag-boundary overlay-container-parent fiery-theme">
 			<session-tracker-widget-wrapper></session-tracker-widget-wrapper>
 		</div>
 	`,

@@ -1,11 +1,16 @@
 import { CdkDragEnd } from '@angular/cdk/drag-drop';
 import { ChangeDetectorRef, Directive, ElementRef, HostListener, Renderer2 } from '@angular/core';
-import { LocalStorageKey, LocalStorageService, OverwolfService } from '@main-app/companion/common';
+import {
+	AbstractSubscriptionComponent,
+	LocalStorageKey,
+	LocalStorageService,
+	OverwolfService,
+} from '@main-app/companion/common';
 import { Observable, UnaryFunction, map, pipe, switchMap } from 'rxjs';
 
 // https://stackoverflow.com/questions/62222979/angular-9-decorators-on-abstract-base-class
 @Directive()
-export abstract class AbstractWidgetWrapperComponent {
+export abstract class AbstractWidgetWrapperComponent extends AbstractSubscriptionComponent {
 	protected abstract defaultPositionLeftProvider: (gameWidth: number, gameHeight: number, dpi: number) => number;
 	protected abstract defaultPositionTopProvider: (gameWidth: number, gameHeight: number, dpi: number) => number;
 	protected widgetName!: string;
@@ -15,10 +20,12 @@ export abstract class AbstractWidgetWrapperComponent {
 	constructor(
 		protected readonly el: ElementRef,
 		protected readonly renderer: Renderer2,
-		protected readonly cdr: ChangeDetectorRef,
+		protected override readonly cdr: ChangeDetectorRef,
 		protected readonly ow: OverwolfService,
 		protected readonly localStorage: LocalStorageService,
-	) {}
+	) {
+		super(cdr);
+	}
 
 	startDragging() {
 		// Do nothing for now

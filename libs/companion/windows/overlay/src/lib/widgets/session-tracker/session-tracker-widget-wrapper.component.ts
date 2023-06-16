@@ -27,8 +27,6 @@ import { AbstractWidgetWrapperComponent } from '../_widget-wrapper.component';
 export class SessionTrackerWidgetWrapperComponent extends AbstractWidgetWrapperComponent implements AfterContentInit {
 	showWidget$!: Observable<boolean>;
 
-	private windowId!: string;
-
 	protected defaultPositionLeftProvider = (gameWidth: number, gameHeight: number, dpi: number) => 0;
 	protected defaultPositionTopProvider = (gameWidth: number, gameHeight: number, dpi: number) => gameHeight - 200;
 
@@ -52,13 +50,5 @@ export class SessionTrackerWidgetWrapperComponent extends AbstractWidgetWrapperC
 			distinctUntilChanged(),
 			this.handleReposition(),
 		);
-
-		this.windowId = (await this.ow.getCurrentWindow()).id;
-		this.ow.addGameInfoUpdatedListener(async (res) => {
-			if (res && res.resolutionChanged) {
-				this.ow.maximize(this.windowId);
-			}
-		});
-		this.ow.maximize(this.windowId);
 	}
 }
