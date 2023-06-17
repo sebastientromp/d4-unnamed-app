@@ -1,18 +1,11 @@
-import {
-	AfterContentInit,
-	AfterViewInit,
-	ChangeDetectionStrategy,
-	ChangeDetectorRef,
-	Component,
-	ElementRef,
-	Renderer2,
-} from '@angular/core';
+import { AfterContentInit, ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
 import { AppStoreFacadeService } from '@main-app/companion/background';
-import { LocalStorageService, OverwolfService } from '@main-app/companion/common';
-import { GameSessionLocationEvent } from 'libs/companion/background/src/lib/session-tracker/game-session.model';
-import { Observable, combineLatest, filter, map } from 'rxjs';
-import { AbstractWidgetWrapperComponent } from '../_widget-wrapper.component';
-import { SessionTrackerSection } from './session-tracker-section.model';
+import { AbstractSubscriptionComponent } from '@main-app/companion/common';
+import {
+	GameSession,
+	GameSessionLocationOverview,
+} from 'libs/companion/background/src/lib/session-tracker/game-session.model';
+import { Observable, filter, map } from 'rxjs';
 
 @Component({
 	selector: 'session-tracker-widget',
@@ -32,11 +25,11 @@ import { SessionTrackerSection } from './session-tracker-section.model';
 			</div>
 		</div>
 		<div class="session-recap">
-			<session-tracker-section-content class="overview" [title]="'Overview'" [section]="overview$ | async">
+			<session-tracker-section-content class="overview" [section]="overview$ | async">
 			</session-tracker-section-content>
 			<div class="details">
-				<div class="section" *ngFor="let section of sections$ | async">
-					<session-tracker-section-content class="overview" [title]="section.title" [section]="section">
+				<div class="section" *ngFor="let section of sections$ | async; trackBy: trackBySection">
+					<session-tracker-section-content class="overview" [section]="section">
 					</session-tracker-section-content>
 				</div>
 			</div>
@@ -44,89 +37,39 @@ import { SessionTrackerSection } from './session-tracker-section.model';
 	</div>`,
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SessionTrackerWidgetComponent
-	extends AbstractWidgetWrapperComponent
-	implements AfterContentInit, AfterViewInit
-{
-	sections$!: Observable<readonly GameSessionLocationEvent[]>;
-	overview$!: Observable<SessionTrackerSection>;
+export class SessionTrackerWidgetComponent extends AbstractSubscriptionComponent implements AfterContentInit {
+	sections$!: Observable<readonly GameSessionLocationOverview[]>;
+	overview$!: Observable<GameSessionLocationOverview>;
 
-	private windowId!: string;
-
-	protected defaultPositionLeftProvider = (gameWidth: number, gameHeight: number, dpi: number) => gameWidth - 200;
-	protected defaultPositionTopProvider = (gameWidth: number, gameHeight: number, dpi: number) => gameHeight - 200;
-
-	constructor(
-		protected override readonly ow: OverwolfService,
-		protected override readonly cdr: ChangeDetectorRef,
-		protected override readonly el: ElementRef,
-		protected override readonly renderer: Renderer2,
-		protected override readonly localStorage: LocalStorageService,
-		private readonly store: AppStoreFacadeService,
-	) {
-		super(el, renderer, cdr, ow, localStorage);
-		super.widgetName = 'session-recap';
+	constructor(protected override readonly cdr: ChangeDetectorRef, private readonly store: AppStoreFacadeService) {
+		super(cdr);
 	}
 
 	async ngAfterContentInit(): Promise<void> {
-		this.sections$ = this.store.gameSession$$().pipe(this.mapData((session) => session?.locationEvents ?? []));
-		const totalGoldEarned$ = this.store
-			.gameSession$$()
-			.pipe(
-				this.mapData(
-					(session) => session?.locationEvents.map((loc) => loc.goldEarned).reduce((a, b) => a + b, 0) ?? 0,
-				),
-			);
-		const totalTimeSpentInClosedLocs$ = this.store.gameSession$$().pipe(
-			this.mapData(
-				(session) =>
-					session?.locationEvents
-						.filter((loc) => loc.exitTimestamp != null)
-						.map((loc) => (loc.exitTimestamp as number) - loc.enterTimestamp)
-						.reduce((a, b) => a + b, 0) ?? 0,
-			),
-		);
-		const totalTimeInCurrentLoc$ = this.store.gameSession$$().pipe(
-			map((session) => session?.locationEvents.find((loc) => loc.exitTimestamp == null)),
-			filter((loc) => !!loc),
-			this.mapData((loc) => Date.now() - (loc?.enterTimestamp as number)),
-		);
-		const totalTimeSpent$ = combineLatest([totalTimeSpentInClosedLocs$, totalTimeInCurrentLoc$]).pipe(
-			this.mapData(([closed, current]) => closed + current),
-		);
-		this.overview$ = combineLatest([totalGoldEarned$, totalTimeSpent$]).pipe(
-			this.mapData(([gold, duration]) => {
+		this.sections$ = this.store.gameSession$$().pipe(map((session) => session?.locationOverviews ?? []));
+		this.overview$ = this.store.gameSession$$().pipe(
+			filter((session) => session != null),
+			map((session) => session as GameSession),
+			this.mapData((session) => {
 				return {
-					title: 'Overview',
-					goldEarned: gold,
-					timeSpentInMillis: duration,
-				} as SessionTrackerSection;
+					goldEarned: session.locationOverviews.reduce((acc, loc) => acc + loc.goldEarned, 0),
+					totalTimeSpentInMillis: session.locationOverviews.reduce(
+						(acc, loc) => acc + (loc.totalTimeSpentInMillis ?? 0),
+						0,
+					),
+					enterTimestamp:
+						session.locationOverviews.find((loc) => loc.exitTimestamp == null)?.enterTimestamp ?? 0,
+					exitTimestamp: undefined,
+				} as GameSessionLocationOverview;
 			}),
 		);
 	}
 
-	async ngAfterViewInit() {
-		this.windowId = (await this.ow.getCurrentWindow()).id;
-		this.ow.addGameInfoUpdatedListener(async (res) => {
-			if (res && res.resolutionChanged) {
-				this.ow.maximize(this.windowId);
-			}
-		});
-		this.ow.maximize(this.windowId);
+	close(): void {
+		console.debug('[session-tracker] closing');
 	}
 
-	close() {
-		console.debug('[session-tracker] closing window');
+	trackBySection(index: number, section: GameSessionLocationOverview): string {
+		return section.location;
 	}
 }
-
-const formatMilliseconds = (milliseconds: number): string => {
-	const date = new Date(milliseconds);
-
-	const hours = date.getUTCHours() > 0 ? String(date.getUTCHours()).padStart(2, '0') + ':' : '';
-	const minutes =
-		date.getUTCHours() > 0 || date.getUTCMinutes() > 0 ? String(date.getUTCMinutes()).padStart(2, '0') + ':' : '';
-	const seconds = String(date.getUTCSeconds()).padStart(2, '0');
-
-	return `${hours}${minutes}${seconds}`;
-};

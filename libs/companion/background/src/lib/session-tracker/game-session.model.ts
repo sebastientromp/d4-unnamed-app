@@ -1,12 +1,13 @@
 export interface GameSession {
 	readonly startTime: number;
-	readonly locationEvents: readonly GameSessionLocationEvent[];
+	readonly locationOverviews: readonly GameSessionLocationOverview[];
 }
 
-export interface GameSessionLocationEvent {
+export interface GameSessionLocationOverview {
 	readonly location: string;
 	readonly enterTimestamp: number;
 	readonly exitTimestamp?: number;
+	readonly totalTimeSpentInMillis?: number;
 	readonly currentGold: number | null;
 	readonly goldEarned: number;
 }
