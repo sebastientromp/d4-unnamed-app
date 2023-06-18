@@ -17,5 +17,6 @@ export class AppComponent implements AfterContentInit {
 			startWith(false),
 			map((initComplete) => initComplete),
 		);
+
 	}
 }
