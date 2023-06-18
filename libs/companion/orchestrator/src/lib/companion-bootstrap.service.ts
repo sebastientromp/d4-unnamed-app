@@ -7,7 +7,7 @@ export class CompanionBootstrapService {
 		const plausible = Plausible({
 			domain: 'd4-companion.gg-app',
 			trackLocalhost: true,
-			apiHost: 'http://195.201.219.87:8000',
+			apiHost: 'https://apps.zerotoheroes.com',
 		});
 		plausible.trackPageview();
 		return true;
