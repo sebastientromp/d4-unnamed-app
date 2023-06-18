@@ -3,7 +3,7 @@ import { PackOpkCommand } from '@overwolf/ow-cli/bin/commands/opk/pack-opk.comma
 import { readFile } from 'fs/promises';
 import 'reflect-metadata';
 
-export const appName = 'D4Chaos';
+export const appName = 'D4Companion';
 
 const pipeline = async () => {
 	OwCliContainer.init();
