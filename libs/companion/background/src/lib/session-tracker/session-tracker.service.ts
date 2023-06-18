@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { GameStatusService } from '@main-app/companion/common';
 import { BehaviorSubject, distinctUntilChanged, filter } from 'rxjs';
 import { EventsEmitterService } from '../events/events-emitter.service';
-import { GameStateService } from '../game-state/game-state.service';
 import { GameSession, GameSessionLocationOverview } from './game-session.model';
 
 @Injectable()
@@ -12,10 +11,27 @@ export class SessionTrackerService {
 	constructor(
 		private readonly eventsEmitter: EventsEmitterService,
 		private readonly gameStatus: GameStatusService,
-		private readonly gameState: GameStateService,
 	) {}
 
 	public async init(): Promise<void> {
+		this.initEventsListeners();
+		this.gameStatus.inGame$$.subscribe((inGame) => {
+			if (inGame) {
+				this.gameSession$$.next(this.initGameSession());
+			} else {
+				this.closeGameSession();
+			}
+		})
+	}
+
+	private closeGameSession() {
+		// add the exitTimestamp of the last lcation
+		// check for data integrity
+		// save the value in the local storage
+		// + put in place a page on the main window to check the stats
+	}
+
+	private initEventsListeners(): void {
 		this.eventsEmitter.currentLocation$$
 			.pipe(
 				filter((currentLocation) => currentLocation != null),

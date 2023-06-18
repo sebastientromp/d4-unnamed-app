@@ -46,7 +46,7 @@ export class EventsEmitterService {
 				this.currentGold$$.next(parseInt(event.data));
 				break;
 			case 'current_location':
-				this.currentGold$$.next(event.data);
+				this.currentLocation$$.next(event.data);
 				break;
 		}
 	}

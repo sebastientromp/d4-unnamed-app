@@ -1,6 +1,6 @@
 import { AfterContentInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
+import { GameSessionLocationOverview } from '@main-app/companion/background';
 import { AbstractSubscriptionComponent } from '@main-app/companion/common';
-import { GameSessionLocationOverview } from 'libs/companion/background/src/lib/session-tracker/game-session.model';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Component({
@@ -55,7 +55,7 @@ export class SessionTrackerSectionContentComponent extends AbstractSubscriptionC
 	private duration$$ = new BehaviorSubject<number>(0);
 	private goldEarnedPerMinute$$ = new BehaviorSubject<number>(0);
 
-	private totalDurationInMillis: number = 0;
+	private totalDurationInMillis = 0;
 	private durationInterval: any;
 
 	constructor(protected override readonly cdr: ChangeDetectorRef) {

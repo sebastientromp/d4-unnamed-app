@@ -1,10 +1,6 @@
 import { AfterContentInit, ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
-import { AppStoreFacadeService } from '@main-app/companion/background';
+import { AppStoreFacadeService, GameSession, GameSessionLocationOverview } from '@main-app/companion/background';
 import { AbstractSubscriptionComponent } from '@main-app/companion/common';
-import {
-	GameSession,
-	GameSessionLocationOverview,
-} from 'libs/companion/background/src/lib/session-tracker/game-session.model';
 import { Observable, filter, map } from 'rxjs';
 
 @Component({
