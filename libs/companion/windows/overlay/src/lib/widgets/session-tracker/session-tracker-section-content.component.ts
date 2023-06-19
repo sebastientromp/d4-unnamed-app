@@ -1,4 +1,11 @@
-import { AfterContentInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
+import {
+	AfterContentInit,
+	ChangeDetectionStrategy,
+	ChangeDetectorRef,
+	Component,
+	Input,
+	OnDestroy,
+} from '@angular/core';
 import { GameSessionLocationOverview } from '@main-app/companion/background';
 import { AbstractSubscriptionComponent } from '@main-app/companion/common';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -6,10 +13,10 @@ import { BehaviorSubject, Observable } from 'rxjs';
 @Component({
 	selector: 'session-tracker-section-content',
 	styleUrls: ['./session-tracker-section-content.component.scss'],
-	template: ` <div class="section">
+	template: ` <div class="section" *ngIf="duration$ | async as duration">
 		<div class="header">
 			<div class="text">{{ title }}</div>
-			<div class="time">{{ duration$ | async }}</div>
+			<div class="time">{{ duration }}</div>
 		</div>
 		<div class="content">
 			<div class="stat gold">
@@ -21,38 +28,43 @@ import { BehaviorSubject, Observable } from 'rxjs';
 	</div>`,
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SessionTrackerSectionContentComponent extends AbstractSubscriptionComponent implements AfterContentInit {
+export class SessionTrackerSectionContentComponent
+	extends AbstractSubscriptionComponent
+	implements AfterContentInit, OnDestroy
+{
 	duration$!: Observable<string | null>;
 	goldEarnedPerMinute$!: Observable<string | null>;
 
 	@Input() set section(value: GameSessionLocationOverview | null) {
-		if (!value) {
+		console.debug('setting section', value);
+		if (!value || !value.enterTimestamp) {
 			return;
 		}
 
 		this.title = value.location;
 		this.goldEarned = value.goldEarned;
+		if (this.durationInterval) {
+			clearInterval(this.durationInterval);
+		}
 		if (value.exitTimestamp != null) {
-			if (this.durationInterval) {
-				clearInterval(this.durationInterval);
-			}
 			this.totalDurationInMillis = value.totalTimeSpentInMillis ?? 0;
 			this.duration$$.next(this.totalDurationInMillis);
 			this.goldEarnedPerMinute$$.next((value.goldEarned / (value.totalTimeSpentInMillis ?? 0)) * 60000);
 		} else {
 			this.durationInterval = setInterval(() => {
+				// console.debug('updating duration', value);
 				this.totalDurationInMillis = (value.totalTimeSpentInMillis ?? 0) + (Date.now() - value.enterTimestamp);
 				this.duration$$.next(this.totalDurationInMillis);
 				const goldEarnedPerMinuteValue = (value.goldEarned / this.totalDurationInMillis) * 60000;
 				this.goldEarnedPerMinute$$.next(Math.round(goldEarnedPerMinuteValue));
-			});
+			}, 800);
 		}
 	}
 
 	title!: string;
 	goldEarned!: number | null;
 
-	private duration$$ = new BehaviorSubject<number>(0);
+	private duration$$ = new BehaviorSubject<number | null>(null);
 	private goldEarnedPerMinute$$ = new BehaviorSubject<number>(0);
 
 	private totalDurationInMillis = 0;
@@ -68,15 +80,23 @@ export class SessionTrackerSectionContentComponent extends AbstractSubscriptionC
 			.asObservable()
 			.pipe(this.mapData((duration) => `${duration} / min`));
 	}
+
+	override ngOnDestroy(): void {
+		super.ngOnDestroy();
+		if (this.durationInterval) {
+			clearInterval(this.durationInterval);
+		}
+	}
 }
 
-const formatDuration = (milliseconds: number): string => {
+const formatDuration = (milliseconds: number | null): string | null => {
+	if (milliseconds == null) {
+		return null;
+	}
+
 	const date = new Date(milliseconds);
-
 	const hours = date.getUTCHours() > 0 ? String(date.getUTCHours()).padStart(2, '0') + ':' : '';
-	const minutes =
-		date.getUTCHours() > 0 || date.getUTCMinutes() > 0 ? String(date.getUTCMinutes()).padStart(2, '0') + ':' : '';
+	const minutes = String(date.getUTCMinutes()).padStart(2, '0') + ':';
 	const seconds = String(date.getUTCSeconds()).padStart(2, '0');
-
 	return `${hours}${minutes}${seconds}`;
 };

@@ -3,6 +3,8 @@ import { OverwolfService } from '@main-app/companion/common';
 import { BehaviorSubject } from 'rxjs';
 import { MockEventsService } from './mock-events.service';
 
+// import '@overwolf/types';
+
 @Injectable()
 export class EventsEmitterService {
 	public inMatch$$ = new BehaviorSubject<boolean>(true);

@@ -1,7 +1,7 @@
 import { AfterContentInit, ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
 import { AppStoreFacadeService, GameSession, GameSessionLocationOverview } from '@main-app/companion/background';
 import { AbstractSubscriptionComponent } from '@main-app/companion/common';
-import { Observable, filter, map } from 'rxjs';
+import { Observable, filter, map, tap } from 'rxjs';
 
 @Component({
 	selector: 'session-tracker-widget',
@@ -47,7 +47,8 @@ export class SessionTrackerWidgetComponent extends AbstractSubscriptionComponent
 			filter((session) => session != null),
 			map((session) => session as GameSession),
 			this.mapData((session) => {
-				return {
+				const result = {
+					location: 'overview',
 					goldEarned: session.locationOverviews.reduce((acc, loc) => acc + loc.goldEarned, 0),
 					totalTimeSpentInMillis: session.locationOverviews.reduce(
 						(acc, loc) => acc + (loc.totalTimeSpentInMillis ?? 0),
@@ -57,7 +58,9 @@ export class SessionTrackerWidgetComponent extends AbstractSubscriptionComponent
 						session.locationOverviews.find((loc) => loc.exitTimestamp == null)?.enterTimestamp ?? 0,
 					exitTimestamp: undefined,
 				} as GameSessionLocationOverview;
+				return result;
 			}),
+			tap((data) => console.debug('[session-tracker] overview data', data)),
 		);
 	}
 

@@ -20,9 +20,23 @@ export class CompanionOverlayComponent implements AfterContentInit {
 		this.windowId = (await this.ow.getCurrentWindow()).id;
 		this.ow.addGameInfoUpdatedListener(async (res) => {
 			if (res && res.resolutionChanged) {
-				this.ow.maximize(this.windowId);
+				this.maximize();
 			}
 		});
-		this.ow.maximize(this.windowId);
+		this.maximize();
+	}
+
+	private async maximize(): Promise<void> {
+		const gameInfo = await this.ow.getRunningGameInfo();
+		if (!gameInfo) {
+			return;
+		}
+		const gameWidth = gameInfo.width;
+		const gameHeight = gameInfo.height;
+		const height = gameHeight;
+		const width = gameWidth;
+		await this.ow.changeWindowSize(this.windowId, width, height);
+		await this.ow.changeWindowPosition(this.windowId, 0, 0);
+		window.dispatchEvent(new Event('window-resize'));
 	}
 }

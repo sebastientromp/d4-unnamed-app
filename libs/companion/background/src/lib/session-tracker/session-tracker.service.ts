@@ -8,10 +8,7 @@ import { GameSession, GameSessionLocationOverview } from './game-session.model';
 export class SessionTrackerService {
 	public gameSession$$ = new BehaviorSubject<GameSession>(this.initGameSession());
 
-	constructor(
-		private readonly eventsEmitter: EventsEmitterService,
-		private readonly gameStatus: GameStatusService,
-	) {}
+	constructor(private readonly eventsEmitter: EventsEmitterService, private readonly gameStatus: GameStatusService) {}
 
 	public async init(): Promise<void> {
 		this.initEventsListeners();
@@ -21,7 +18,7 @@ export class SessionTrackerService {
 			} else {
 				this.closeGameSession();
 			}
-		})
+		});
 	}
 
 	private closeGameSession() {
@@ -41,14 +38,20 @@ export class SessionTrackerService {
 				console.debug('[session-tracker] new location', gepLocId);
 				const locationId: string = this.toLocationId(gepLocId);
 				let gameSession = this.closeCurrentLocation(this.gameSession$$.value);
-				const existingLocation: GameSessionLocationOverview = gameSession.locationOverviews.find(
+				const locationOverviews = [...gameSession.locationOverviews];
+				let existingLocation: GameSessionLocationOverview | undefined = locationOverviews.find(
 					(loc) => loc.location === locationId,
-				) ?? {
-					location: locationId,
-					enterTimestamp: Date.now(),
-					currentGold: this.eventsEmitter.currentGold$$.value,
-					goldEarned: 0,
-				};
+				);
+				if (existingLocation == null) {
+					existingLocation = {
+						location: locationId,
+						enterTimestamp: Date.now(),
+						currentGold: this.eventsEmitter.currentGold$$.value,
+						goldEarned: 0,
+					};
+					locationOverviews.push(existingLocation);
+				}
+
 				const currentLocation: GameSessionLocationOverview = {
 					...existingLocation,
 					enterTimestamp: Date.now(),
@@ -57,43 +60,42 @@ export class SessionTrackerService {
 
 				gameSession = {
 					...gameSession,
-					locationOverviews: gameSession.locationOverviews.map((loc) =>
+					locationOverviews: locationOverviews.map((loc) =>
 						loc.location === locationId ? currentLocation : loc,
 					),
 				};
 				this.gameSession$$.next(gameSession);
+				console.debug('[session-tracker] after new location', this.gameSession$$.value);
 			});
 
 		this.eventsEmitter.currentGold$$.pipe(filter((currentGold) => currentGold != null)).subscribe((currentGold) => {
-			console.debug('[session-tracker] new gold', currentGold);
+			console.debug('[session-tracker] new gold', currentGold, this.gameSession$$.value);
 			let gameSession = this.gameSession$$.value;
-			const location = gameSession.locationOverviews[gameSession.locationOverviews.length - 1];
+			const location = this.getCurrentLocation(gameSession);
 			if (!location) {
 				console.debug('[session-tracker] no location found for gold', currentGold);
 				return;
 			}
 
-			let updatedLocation: GameSessionLocationOverview = {
+			const goldEarned = this.computeGoldEarned(currentGold);
+			// if (goldEarned <= 0) {
+			// 	console.debug('[session-tracker] no gold earned', currentGold, location.currentGold, goldEarned);
+			// 	// return;
+			// }
+
+			const updatedLocation = {
 				...location,
 				currentGold: currentGold,
-			};
-			const goldEarned = this.computeGoldEarned(currentGold);
-			if (goldEarned <= 0) {
-				return;
-			}
-
-			updatedLocation = {
-				...updatedLocation,
-				goldEarned: goldEarned,
+				goldEarned: location.goldEarned + Math.max(goldEarned, 0),
 			};
 			gameSession = {
 				...gameSession,
-				locationOverviews: [
-					...gameSession.locationOverviews.slice(0, gameSession.locationOverviews.length - 1),
-					updatedLocation,
-				],
+				locationOverviews: gameSession.locationOverviews.map((loc) =>
+					loc.location === updatedLocation.location ? updatedLocation : loc,
+				),
 			};
 			this.gameSession$$.next(gameSession);
+			console.debug('[session-tracker] after new gold', this.gameSession$$.value);
 		});
 
 		this.gameStatus.inGame$$.subscribe((inGame) => {
@@ -103,9 +105,13 @@ export class SessionTrackerService {
 			}
 		});
 	}
-	
+
 	private toLocationId(gepLocId: string | null): string {
 		return gepLocId as string;
+	}
+
+	private getCurrentLocation(gameSession: GameSession): GameSessionLocationOverview | undefined {
+		return gameSession.locationOverviews.find((l) => l.exitTimestamp == null);
 	}
 
 	private closeCurrentLocation(gameSession: GameSession): GameSession {
@@ -113,7 +119,7 @@ export class SessionTrackerService {
 			return gameSession;
 		}
 
-		const location = gameSession.locationOverviews.find((l) => l.exitTimestamp == null);
+		const location = this.getCurrentLocation(gameSession);
 		if (!location) {
 			return gameSession;
 		}
@@ -133,7 +139,7 @@ export class SessionTrackerService {
 
 	private computeGoldEarned(currentGold: number | null): number {
 		const gameSession = this.gameSession$$.value;
-		const location = gameSession.locationOverviews[gameSession.locationOverviews.length - 1];
+		const location = this.getCurrentLocation(gameSession);
 		if (!location) {
 			console.debug('[session-tracker] no location found for gold', currentGold);
 			return 0;

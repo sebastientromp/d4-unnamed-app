@@ -49,7 +49,7 @@ export class CompanionOrchestratorComponent implements AfterContentInit, OnDestr
 		);
 		this.currentWindowName$.subscribe((name) => {
 			const humanFriendlyName = this.buildHumanFriendlyName(name);
-			this.titleService.setTitle(`D4 Chaos - ${humanFriendlyName}`);
+			this.titleService.setTitle(`D4 Companion - ${humanFriendlyName}`);
 		});
 	}
 

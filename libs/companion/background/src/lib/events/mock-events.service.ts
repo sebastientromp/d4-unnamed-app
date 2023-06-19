@@ -23,26 +23,20 @@ export class MockEventsService {
 			]);
 		};
 		(window as any)['newLocation'] = generateNewLocation;
-		generateNewLocation();
+		// generateNewLocation();
 	}
 
 	private async initGold() {
-		let currentGold = Math.floor(Math.random() * 1000);
-		this.events$$.next([
-			{
-				name: 'current_gold',
-				data: `${currentGold}`,
-			},
-		]);
-		setInterval(() => {
-			// Also simulate gold lost (eg buying some stuff)
-			currentGold += Math.floor(Math.random() * 100) - 20;
+		const totalGold = Math.floor(Math.random() * 10000);
+		const generateNewGold = () => {
+			const newGold = Math.floor(Math.random() * 1000) - 500;
 			this.events$$.next([
 				{
 					name: 'current_gold',
-					data: `${currentGold}`,
+					data: `${totalGold + newGold}`,
 				},
 			]);
-		}, 3000);
+		};
+		(window as any)['newGold'] = generateNewGold;
 	}
 }
