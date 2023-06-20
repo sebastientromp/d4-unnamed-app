@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { CompanionBackgroundComponent } from './companion-background.component';
 import { CompanionBackgroundService } from './companion-background.service';
 import { AppStoreFacadeService } from './events/app-store/app-store-facade.service';
+import { AppStoreUiFacadeService } from './events/app-store/app-store-ui-facade.service';
 import { AppStoreService } from './events/app-store/app-store.service';
 import { EventsEmitterService } from './events/events-emitter.service';
 import { MockEventsService } from './events/mock-events.service';
@@ -16,8 +17,9 @@ const components = [CompanionBackgroundComponent];
 	imports: [CommonModule],
 	providers: [
 		CompanionBackgroundService,
-		AppStoreService,
 		AppStoreFacadeService,
+		AppStoreUiFacadeService,
+		AppStoreService,
 		OverlayWindowControllerService,
 		GameStateService,
 		EventsEmitterService,

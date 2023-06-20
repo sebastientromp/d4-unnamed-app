@@ -15,7 +15,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 	styleUrls: ['./session-tracker-section-content.component.scss'],
 	template: ` <div class="section" *ngIf="duration$ | async as duration">
 		<div class="header">
-			<div class="text">{{ title }}</div>
+			<div class="text" [ngClass]="{ title: isOverview }">{{ title }}</div>
 			<div class="time">{{ duration }}</div>
 		</div>
 		<div class="content">
@@ -41,6 +41,7 @@ export class SessionTrackerSectionContentComponent
 			return;
 		}
 
+		this.isOverview = value.location === 'overview';
 		this.title = value.location;
 		this.goldEarned = value.goldEarned;
 		if (this.durationInterval) {
@@ -61,6 +62,7 @@ export class SessionTrackerSectionContentComponent
 		}
 	}
 
+	isOverview!: boolean;
 	title!: string;
 	goldEarned!: number | null;
 
@@ -78,7 +80,7 @@ export class SessionTrackerSectionContentComponent
 		this.duration$ = this.duration$$.asObservable().pipe(this.mapData((duration) => formatDuration(duration)));
 		this.goldEarnedPerMinute$ = this.goldEarnedPerMinute$$
 			.asObservable()
-			.pipe(this.mapData((duration) => `${duration} / min`));
+			.pipe(this.mapData((duration) => `${duration.toFixed(0)} / min`));
 	}
 
 	override ngOnDestroy(): void {

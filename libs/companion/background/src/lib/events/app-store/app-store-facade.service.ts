@@ -1,42 +1,57 @@
 import { Injectable } from '@angular/core';
-import { OverwolfService, sleep } from '@main-app/companion/common';
-import { AppStoreService } from './app-store.service';
+import { GameStatusService } from '@main-app/companion/common';
+import { BehaviorSubject } from 'rxjs';
+import { GameStateService } from '../../game-state/game-state.service';
+import { GameSession } from '../../session-tracker/game-session.model';
+import { SessionTrackerService } from '../../session-tracker/session-tracker.service';
+import { EventsEmitterService } from '../events-emitter.service';
+import { AppEventName, AppStoreService } from './app-store.service';
 
 @Injectable()
 export class AppStoreFacadeService {
-	private store!: AppStoreService;
+	public inGame$$ = new BehaviorSubject<boolean>(false);
+	public inMatch$$ = new BehaviorSubject<boolean>(false);
+	public location$$ = new BehaviorSubject<string | null>(null);
+	public totalTimeSpentInMatchInMiilis$$ = new BehaviorSubject<number>(0);
+	public currentGold$$ = new BehaviorSubject<number | null>(null);
+	public gameSession$$ = new BehaviorSubject<GameSession | null>(null);
 
-	constructor(private readonly ow: OverwolfService) {
+	private initialized = false;
+
+	constructor(
+		private readonly eventsEmitter: EventsEmitterService,
+		private readonly gameStatus: GameStatusService,
+		private readonly gameState: GameStateService,
+		private readonly sessionTracker: SessionTrackerService,
+		private readonly appStore: AppStoreService,
+	) {
+		(window as any)['appStore'] = this;
 		this.init();
 	}
 
-	public inGame$$ = () => this.store.inGame$$;
-	public inMatch$$ = () => this.store.inMatch$$;
-	public totalTimeSpentInMatchInMiilis$$ = () => this.store.totalTimeSpentInMatchInMiilis$$;
-	public currentGold$$ = () => this.store.currentGold$$;
-	public gameSession$$ = () => this.store.gameSession$$;
-
-	public async initComplete(): Promise<void> {
-		await this.waitForStoreInstance();
-		return this.store.initComplete();
+	public send(eventName: AppEventName) {
+		this.appStore.send(eventName);
 	}
 
 	private async init() {
-		this.store = this.ow.getMainWindow()?.appStore;
-		while (!this.store) {
-			console.warn('could not retrieve store from main window');
-			console.debug(this.ow.getMainWindow());
-			await sleep(200);
-		}
+		this.inGame$$ = this.gameStatus.inGame$$;
+		this.inMatch$$ = this.eventsEmitter.inMatch$$;
+		this.location$$ = this.eventsEmitter.currentLocation$$;
+		this.totalTimeSpentInMatchInMiilis$$ = this.gameState.totalTimeSpentInMatchInMillis$$;
+		this.currentGold$$ = this.eventsEmitter.currentGold$$;
+		this.gameSession$$ = this.sessionTracker.gameSession$$ as BehaviorSubject<GameSession | null>;
+
+		this.initialized = true;
 	}
 
-	private async waitForStoreInstance(): Promise<void> {
+	public async initComplete(): Promise<void> {
 		return new Promise<void>((resolve) => {
 			const dbWait = () => {
-				if (this.store) {
+				if (this.initialized) {
 					resolve();
 				} else {
-					setTimeout(() => dbWait(), 10);
+					console.warn('wait for store init');
+					setTimeout(() => dbWait(), 500);
 				}
 			};
 			dbWait();

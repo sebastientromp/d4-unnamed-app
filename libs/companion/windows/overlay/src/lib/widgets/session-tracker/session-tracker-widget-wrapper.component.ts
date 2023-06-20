@@ -6,9 +6,9 @@ import {
 	ElementRef,
 	Renderer2,
 } from '@angular/core';
-import { AppStoreFacadeService } from '@main-app/companion/background';
+import { AppStoreUiFacadeService } from '@main-app/companion/background';
 import { LocalStorageService, OverwolfService } from '@main-app/companion/common';
-import { Observable, combineLatest, distinctUntilChanged, map, tap } from 'rxjs';
+import { Observable, combineLatest, distinctUntilChanged, tap } from 'rxjs';
 import { AbstractWidgetWrapperComponent } from '../_widget-wrapper.component';
 
 @Component({
@@ -36,17 +36,16 @@ export class SessionTrackerWidgetWrapperComponent extends AbstractWidgetWrapperC
 		protected override readonly el: ElementRef,
 		protected override readonly renderer: Renderer2,
 		protected override readonly localStorage: LocalStorageService,
-		private readonly store: AppStoreFacadeService,
+		private readonly store: AppStoreUiFacadeService,
 	) {
 		super(el, renderer, cdr, ow, localStorage);
 		super.widgetName = 'session-recap';
 	}
 
 	async ngAfterContentInit(): Promise<void> {
-		console.debug('initializing showWidget$', this.store.inMatch$$(), this.store.inGame$$());
-		this.showWidget$ = combineLatest([this.store.inMatch$$(), this.store.inGame$$()]).pipe(
+		this.showWidget$ = combineLatest([this.store.inMatch$$(), this.store.location$$()]).pipe(
 			tap((info) => console.log('show widget?', info)),
-			map(([inMatch, inGame]) => inMatch || inGame),
+			this.mapData(([inMatch, location]) => inMatch || !!location),
 			distinctUntilChanged(),
 			this.handleReposition(),
 		);

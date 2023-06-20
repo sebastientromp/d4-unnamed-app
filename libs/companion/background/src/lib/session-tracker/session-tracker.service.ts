@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { GameStatusService } from '@main-app/companion/common';
 import { BehaviorSubject, distinctUntilChanged, filter } from 'rxjs';
+import { AppStoreService } from '../events/app-store/app-store.service';
 import { EventsEmitterService } from '../events/events-emitter.service';
 import { GameSession, GameSessionLocationOverview } from './game-session.model';
 
@@ -8,7 +9,11 @@ import { GameSession, GameSessionLocationOverview } from './game-session.model';
 export class SessionTrackerService {
 	public gameSession$$ = new BehaviorSubject<GameSession>(this.initGameSession());
 
-	constructor(private readonly eventsEmitter: EventsEmitterService, private readonly gameStatus: GameStatusService) {}
+	constructor(
+		private readonly eventsEmitter: EventsEmitterService,
+		private readonly gameStatus: GameStatusService,
+		private readonly appStore: AppStoreService,
+	) {}
 
 	public async init(): Promise<void> {
 		this.initEventsListeners();
@@ -18,6 +23,9 @@ export class SessionTrackerService {
 			} else {
 				this.closeGameSession();
 			}
+		});
+		this.appStore.eventsQueue$$.pipe(filter((e) => e?.eventName === 'reset-session')).subscribe((resetEvent) => {
+			this.gameSession$$.next(this.initGameSession());
 		});
 	}
 

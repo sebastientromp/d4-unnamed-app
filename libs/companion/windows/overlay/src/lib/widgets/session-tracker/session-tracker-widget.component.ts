@@ -1,5 +1,5 @@
 import { AfterContentInit, ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
-import { AppStoreFacadeService, GameSession, GameSessionLocationOverview } from '@main-app/companion/background';
+import { AppStoreUiFacadeService, GameSession, GameSessionLocationOverview } from '@main-app/companion/background';
 import { AbstractSubscriptionComponent } from '@main-app/companion/common';
 import { Observable, filter, map, tap } from 'rxjs';
 
@@ -11,12 +11,12 @@ import { Observable, filter, map, tap } from 'rxjs';
 		<div class="controls">
 			<div class="title">Session recap</div>
 			<div class="buttons">
-				<!-- <div
+				<div
 					class="button reset"
-					[helpTooltip]="'session.buttons.reset-tooltip' | owTranslate"
+					[helpTooltip]="'Reset session'"
 					inlineSVG="assets/svg/restore.svg"
 					(click)="reset()"
-				></div> -->
+				></div>
 				<control-close class="button close" (requestClose)="close()"></control-close>
 			</div>
 		</div>
@@ -24,8 +24,13 @@ import { Observable, filter, map, tap } from 'rxjs';
 			<session-tracker-section-content class="overview" [section]="overview$ | async">
 			</session-tracker-section-content>
 			<div class="details">
-				<div class="section" *ngFor="let section of sections$ | async; trackBy: trackBySection">
-					<session-tracker-section-content class="overview" [section]="section">
+				<div class="title">Zones</div>
+				<div class="sections">
+					<session-tracker-section-content
+						class="section"
+						*ngFor="let section of sections$ | async; trackBy: trackBySection"
+						[section]="section"
+					>
 					</session-tracker-section-content>
 				</div>
 			</div>
@@ -37,12 +42,25 @@ export class SessionTrackerWidgetComponent extends AbstractSubscriptionComponent
 	sections$!: Observable<readonly GameSessionLocationOverview[]>;
 	overview$!: Observable<GameSessionLocationOverview>;
 
-	constructor(protected override readonly cdr: ChangeDetectorRef, private readonly store: AppStoreFacadeService) {
+	constructor(protected override readonly cdr: ChangeDetectorRef, private readonly store: AppStoreUiFacadeService) {
 		super(cdr);
 	}
 
 	async ngAfterContentInit(): Promise<void> {
-		this.sections$ = this.store.gameSession$$().pipe(map((session) => session?.locationOverviews ?? []));
+		this.sections$ = this.store.gameSession$$().pipe(
+			map((session) => session?.locationOverviews ?? []),
+			this.mapData((locations) =>
+				[...locations].sort((a, b) => {
+					if (!a.exitTimestamp) {
+						return -1;
+					}
+					if (!b.exitTimestamp) {
+						return 1;
+					}
+					return b.exitTimestamp - a.exitTimestamp;
+				}),
+			),
+		);
 		this.overview$ = this.store.gameSession$$().pipe(
 			filter((session) => session != null),
 			map((session) => session as GameSession),
@@ -66,6 +84,10 @@ export class SessionTrackerWidgetComponent extends AbstractSubscriptionComponent
 
 	close(): void {
 		console.debug('[session-tracker] closing');
+	}
+
+	reset(): void {
+		this.store.send('reset-session');
 	}
 
 	trackBySection(index: number, section: GameSessionLocationOverview): string {

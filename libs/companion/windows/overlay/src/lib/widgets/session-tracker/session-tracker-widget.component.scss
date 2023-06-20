@@ -40,5 +40,16 @@
 				margin-left: auto;
 			}
 		}
+
+		.details {
+			display: flex;
+			flex-direction: column;
+
+			.sections {
+				display: flex;
+				flex-direction: column;
+				padding-left: 10px;
+			}
+		}
 	}
 }

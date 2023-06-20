@@ -2,6 +2,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { CompanionBackgroundModule } from '@main-app/companion/background';
+import { CompanionCommonModule } from '@main-app/companion/common';
 import { CompanionWindowsCommonModule } from '@main-app/companion/windows/common';
 import { CompanionOverlayComponent } from './companion-overlay.component';
 import { SessionTrackerSectionContentComponent } from './widgets/session-tracker/session-tracker-section-content.component';
@@ -16,7 +17,13 @@ const components = [
 ];
 
 @NgModule({
-	imports: [CommonModule, DragDropModule, CompanionBackgroundModule, CompanionWindowsCommonModule],
+	imports: [
+		CommonModule,
+		DragDropModule,
+		CompanionBackgroundModule,
+		CompanionCommonModule,
+		CompanionWindowsCommonModule,
+	],
 	declarations: components,
 	exports: components,
 })

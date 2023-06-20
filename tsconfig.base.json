@@ -7,6 +7,8 @@
 		"moduleResolution": "node",
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
+		"resolveJsonModule": true,
+		"allowSyntheticDefaultImports": true,
 		"importHelpers": true,
 		"target": "es2022",
 		"module": "esnext",
@@ -27,5 +29,5 @@
 			"stream": ["./node_modules/stream-browserify"]
 		}
 	},
-	"exclude": ["node_modules", "tmp"]
+	"exclude": ["node_modules"]
 }
