@@ -11,12 +11,11 @@ import { Observable, filter, map, tap } from 'rxjs';
 		<div class="controls">
 			<div class="title">Session recap</div>
 			<div class="buttons">
-				<div
+				<control-reset
 					class="button reset"
 					[helpTooltip]="'Reset session'"
-					inlineSVG="assets/svg/restore.svg"
-					(click)="reset()"
-				></div>
+					(requestReset)="reset()"
+				></control-reset>
 				<control-close class="button close" (requestClose)="close()"></control-close>
 			</div>
 		</div>

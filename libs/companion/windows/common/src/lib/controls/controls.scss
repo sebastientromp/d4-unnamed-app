@@ -2,7 +2,7 @@
 	position: relative;
 	width: 30px;
 	height: 30px;
-	--icon-color: var(--color-2);
+	--icon-color: var(--color-common-1);
 	background-color: transparent;
 	display: flex;
 	align-items: center;
@@ -19,7 +19,7 @@
 	}
 
 	&:hover {
-		background: var(--color-2);
+		background: var(--color-common-1);
 		--icon-color: var(--color-dark-2);
 	}
 }

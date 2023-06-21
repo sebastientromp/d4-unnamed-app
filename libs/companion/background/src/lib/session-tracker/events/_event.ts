@@ -3,4 +3,9 @@ export interface GameSessionEvent {
 	readonly data?: any;
 }
 
-export type GameSessionEventName = 'start-session' | 'end-session' | 'location-update' | 'gold-update';
+export type GameSessionEventName =
+	| 'start-session'
+	| 'end-session'
+	| 'reset-session'
+	| 'location-update'
+	| 'gold-update';

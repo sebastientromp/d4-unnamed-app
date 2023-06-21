@@ -8,6 +8,7 @@ import { GameSessionEventProcessor } from './events/_processor';
 import { EndSessionEvent, EndSessionEventProcessor } from './events/end-session';
 import { GoldUpdateEvent, GoldUpdateEventProcessor } from './events/gold-update';
 import { LocationUpdateEvent, LocationUpdateEventProcessor } from './events/location-update';
+import { ResetSessionEvent, ResetSessionEventProcessor } from './events/reset-session';
 import { StartSessionEvent, StartSessionEventProcessor } from './events/start-session';
 import { GameSession } from './game-session.model';
 
@@ -19,6 +20,7 @@ export class SessionTrackerService {
 	private eventProcessors: { [eventName in GameSessionEventName]: GameSessionEventProcessor } = {
 		'start-session': new StartSessionEventProcessor(),
 		'end-session': new EndSessionEventProcessor(),
+		'reset-session': new ResetSessionEventProcessor(),
 		'location-update': new LocationUpdateEventProcessor(),
 		'gold-update': new GoldUpdateEventProcessor(),
 	};
@@ -56,7 +58,7 @@ export class SessionTrackerService {
 			}
 		});
 		this.appStore.eventsQueue$$.pipe(filter((e) => e?.eventName === 'reset-session')).subscribe((resetEvent) => {
-			this.eventQueue$$.next(new StartSessionEvent());
+			this.eventQueue$$.next(new ResetSessionEvent());
 		});
 		this.initEventsListeners();
 	}

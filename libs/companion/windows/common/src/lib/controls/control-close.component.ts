@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Output } from '@angular/core';
-import { OverwolfService } from '@main-app/companion/common';
 
 @Component({
 	selector: 'control-close',
@@ -9,8 +8,6 @@ import { OverwolfService } from '@main-app/companion/common';
 })
 export class ControlCloseComponent {
 	@Output() requestClose = new EventEmitter<void>();
-
-	constructor(private readonly ow: OverwolfService) {}
 
 	async closeWindow() {
 		this.requestClose.next();

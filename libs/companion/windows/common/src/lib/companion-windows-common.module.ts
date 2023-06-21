@@ -5,6 +5,7 @@ import { CompanionCommonModule } from '@main-app/companion/common';
 import { InlineSVGModule } from 'ng-inline-svg-2';
 import { SingleAdComponent } from './ad/single-ad.component';
 import { ControlCloseComponent } from './controls/control-close.component';
+import { ControlResetComponent } from './controls/control-reset.component';
 import { LayoutComponent } from './layout.component';
 import { MainNavigationComponent } from './navigation/main-navigation.component';
 import { NavigationViewComponent } from './navigation/navigation-view.component';
@@ -17,6 +18,7 @@ const components = [
 	NavigationViewComponent,
 	MainNavigationComponent,
 	ControlCloseComponent,
+	ControlResetComponent,
 ];
 @NgModule({
 	imports: [CommonModule, HttpClientModule, InlineSVGModule.forRoot(), CompanionCommonModule],
