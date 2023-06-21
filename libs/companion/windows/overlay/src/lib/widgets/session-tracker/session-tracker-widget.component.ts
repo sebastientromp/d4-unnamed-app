@@ -1,6 +1,6 @@
 import { AfterContentInit, ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
 import { AppStoreUiFacadeService, GameSession, GameSessionLocationOverview } from '@main-app/companion/background';
-import { AbstractSubscriptionComponent } from '@main-app/companion/common';
+import { AbstractSubscriptionComponent, AdService } from '@main-app/companion/common';
 import { Observable, filter, map, tap } from 'rxjs';
 
 @Component({
@@ -35,14 +35,20 @@ import { Observable, filter, map, tap } from 'rxjs';
 				</div>
 			</div>
 		</div>
+		<single-ad class="ad" *ngIf="showAds$ | async"></single-ad>
 	</div>`,
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SessionTrackerWidgetComponent extends AbstractSubscriptionComponent implements AfterContentInit {
 	sections$!: Observable<readonly GameSessionLocationOverview[]>;
 	overview$!: Observable<GameSessionLocationOverview>;
+	showAds$!: Observable<boolean>;
 
-	constructor(protected override readonly cdr: ChangeDetectorRef, private readonly store: AppStoreUiFacadeService) {
+	constructor(
+		protected override readonly cdr: ChangeDetectorRef,
+		private readonly store: AppStoreUiFacadeService,
+		private readonly adService: AdService,
+	) {
 		super(cdr);
 	}
 
@@ -62,6 +68,7 @@ export class SessionTrackerWidgetComponent extends AbstractSubscriptionComponent
 			),
 		);
 		this.overview$ = this.store.gameSession$$().pipe(
+			tap((session) => console.debug('[session-tracker] session', session, this.store)),
 			filter((session) => session != null),
 			map((session) => session as GameSession),
 			this.mapData((session) => {
@@ -80,10 +87,12 @@ export class SessionTrackerWidgetComponent extends AbstractSubscriptionComponent
 			}),
 			tap((data) => console.debug('[session-tracker] overview data', data)),
 		);
+		this.showAds$ = this.adService.showAds$$.asObservable();
 	}
 
 	close(): void {
-		console.debug('[session-tracker] closing');
+		console.debug('[session-tracker] close');
+		this.store.send('close-session-widget');
 	}
 
 	reset(): void {

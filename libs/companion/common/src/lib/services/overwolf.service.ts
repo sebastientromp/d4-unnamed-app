@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 
 const DIABLO_IV_GAME_ID = 22700;
+const NO_AD_PLAN = 13;
 
 @Injectable()
 export class OverwolfService {
@@ -220,6 +221,27 @@ export class OverwolfService {
 				console.error('Exception while trying to setRequiredFeatures', features, e);
 				resolve();
 			}
+		});
+	}
+
+	public async onSubscriptionChanged(
+		listener: (event: overwolf.profile.subscriptions.SubscriptionChangedEvent) => void,
+	) {
+		overwolf.profile.subscriptions.onSubscriptionChanged.addListener(listener);
+	}
+
+	public async shouldShowAds(): Promise<boolean> {
+		return new Promise<boolean>((resolve) => {
+			if (!overwolf.profile.subscriptions) {
+				resolve(true);
+				return;
+			}
+			overwolf.profile.subscriptions.getActivePlans(
+				(activePlans: overwolf.profile.subscriptions.GetActivePlansResult) => {
+					const hideAds = activePlans && activePlans.plans && activePlans.plans.includes(NO_AD_PLAN);
+					resolve(!hideAds);
+				},
+			);
 		});
 	}
 }

@@ -8,7 +8,7 @@ import territories from '../data/territories.json';
 
 @Injectable()
 export class EventsEmitterService {
-	public inMatch$$ = new BehaviorSubject<boolean>(false);
+	public inMatch$$ = new BehaviorSubject<boolean | null>(null);
 	public currentGold$$ = new BehaviorSubject<number | null>(null);
 	public currentLocation$$ = new BehaviorSubject<string | null>(null);
 
@@ -49,6 +49,7 @@ export class EventsEmitterService {
 				this.currentGold$$.next(parseInt(event.data));
 				break;
 			case 'current_location':
+				// Not sent
 				break;
 		}
 	}
@@ -63,18 +64,40 @@ export class EventsEmitterService {
 		if (matchInfo.location) {
 			const location: { x: number; y: number; z: number } = JSON.parse(matchInfo.location);
 			const region = this.buildRegion(location);
-			console.debug('built region', region, location);
+			// The order is important, as we want the "session start" event to arrive first
+			console.debug('processing location', matchInfo.location, region, this.inMatch$$.value);
+			if (this.inMatch$$.value == null) {
+				this.inMatch$$.next(region != null);
+			}
+			this.currentLocation$$.next(region);
+			// Only used initially, if we start the app in a match
+		}
+	}
+
+	private processGepGameInfo(info: any) {
+		console.debug('[events-emitter] received info', info);
+		const matchInfo = info?.res?.match_info;
+		if (!matchInfo) {
+			return;
+		}
+
+		if (matchInfo.location) {
+			const location: { x: number; y: number; z: number } = JSON.parse(matchInfo.location);
+			const region = this.buildRegion(location);
+			if (this.inMatch$$.value == null) {
+				this.inMatch$$.next(region != null);
+			}
 			this.currentLocation$$.next(region);
 		}
 	}
 
-	private processGepGameInfo(event: any) {
-		console.debug('[events-emitter] received info', event);
-	}
-
-	private buildRegion(data: { x: number; y: number; z: number }): string {
+	private buildRegion(data: { x: number; y: number; z: number }): string | null {
 		const territory = getTerritoryByPoint({ x: data.x, y: data.y });
-		return (territory?.name || territory?.id) ?? 'Unknown';
+		if (territory) {
+			return (territory?.name || territory?.id) ?? 'Unknown';
+		}
+		console.debug('[events-emitter] could not find territory for', data);
+		return null;
 	}
 }
 

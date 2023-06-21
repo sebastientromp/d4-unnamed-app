@@ -14,9 +14,10 @@ export class AppStoreUiFacadeService {
 	public inGame$$ = () => this.store.inGame$$;
 	public inMatch$$ = () => this.store.inMatch$$;
 	public location$$ = () => this.store.location$$;
-	public totalTimeSpentInMatchInMiilis$$ = () => this.store.totalTimeSpentInMatchInMiilis$$;
+	// public totalTimeSpentInMatchInMiilis$$ = () => this.store.totalTimeSpentInMatchInMiilis$$;
 	public currentGold$$ = () => this.store.currentGold$$;
 	public gameSession$$ = () => this.store.gameSession$$;
+	public sessionWidgetClosedByUser$$ = () => this.store.sessionWidgetClosedByUser$$;
 
 	public send(eventName: AppEventName) {
 		this.store.send(eventName);

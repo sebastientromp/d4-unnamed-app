@@ -1,5 +1,6 @@
 export * from './lib/companion-common.module';
 export * from './lib/components/abstract-subscription.component';
+export * from './lib/services/ad.service';
 export * from './lib/services/game-status.service';
 export * from './lib/services/local-storage.service';
 export * from './lib/services/overwolf.service';

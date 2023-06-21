@@ -6,7 +6,7 @@ import {
 	LocalStorageService,
 	OverwolfService,
 } from '@main-app/companion/common';
-import { Observable, UnaryFunction, map, pipe, switchMap } from 'rxjs';
+import { Observable, UnaryFunction, pipe, switchMap } from 'rxjs';
 
 // https://stackoverflow.com/questions/62222979/angular-9-decorators-on-abstract-base-class
 @Directive()
@@ -61,11 +61,13 @@ export abstract class AbstractWidgetWrapperComponent extends AbstractSubscriptio
 		return pipe(
 			switchMap(async (visible: boolean) => {
 				if (visible) {
-					const repositioned = await this.reposition();
+					await this.reposition();
 				}
 				return visible;
 			}),
-			map((visible) => visible),
+			this.mapData((visible) => {
+				return visible;
+			}),
 		);
 	}
 

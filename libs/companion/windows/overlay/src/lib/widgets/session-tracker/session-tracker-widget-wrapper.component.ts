@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { AppStoreUiFacadeService } from '@main-app/companion/background';
 import { LocalStorageService, OverwolfService } from '@main-app/companion/common';
-import { Observable, combineLatest, distinctUntilChanged, tap } from 'rxjs';
+import { Observable, combineLatest, tap } from 'rxjs';
 import { AbstractWidgetWrapperComponent } from '../_widget-wrapper.component';
 
 @Component({
@@ -43,10 +43,10 @@ export class SessionTrackerWidgetWrapperComponent extends AbstractWidgetWrapperC
 	}
 
 	async ngAfterContentInit(): Promise<void> {
-		this.showWidget$ = combineLatest([this.store.inMatch$$(), this.store.location$$()]).pipe(
-			tap((info) => console.log('show widget?', info)),
-			this.mapData(([inMatch, location]) => inMatch || !!location),
-			distinctUntilChanged(),
+		this.showWidget$ = combineLatest([this.store.inMatch$$(), this.store.sessionWidgetClosedByUser$$()]).pipe(
+			tap((info) => console.debug('show widget?', info)),
+			this.mapData(([inMatch, sessionWidgetClosedByUser]) => !sessionWidgetClosedByUser && !!inMatch),
+			tap((info) => console.debug('will show widget?', info)),
 			this.handleReposition(),
 		);
 	}

@@ -1,6 +1,6 @@
 .session-tracker {
-	width: 250px;
-	height: 500px;
+	width: 400px;
+	height: fit-content;
 	border-radius: 15px;
 
 	.background {
@@ -52,4 +52,9 @@
 			}
 		}
 	}
+}
+
+.ad {
+	width: 400px;
+	height: 300px;
 }

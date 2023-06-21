@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { AdService } from './services/ad.service';
 import { GameStatusService } from './services/game-status.service';
 import { LocalStorageService } from './services/local-storage.service';
 import { OverwolfService } from './services/overwolf.service';
@@ -10,7 +11,7 @@ const components = [HelpTooltipComponent, HelpTooltipDirective];
 
 @NgModule({
 	imports: [CommonModule],
-	providers: [OverwolfService, GameStatusService, LocalStorageService],
+	providers: [OverwolfService, GameStatusService, LocalStorageService, AdService],
 	declarations: components,
 	exports: components,
 })

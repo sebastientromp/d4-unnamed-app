@@ -1,13 +1,27 @@
 import { Injectable } from '@angular/core';
 import { GameStatusService } from '@main-app/companion/common';
-import { BehaviorSubject, distinctUntilChanged, filter } from 'rxjs';
+import { BehaviorSubject, filter } from 'rxjs';
 import { AppStoreService } from '../events/app-store/app-store.service';
 import { EventsEmitterService } from '../events/events-emitter.service';
-import { GameSession, GameSessionLocationOverview } from './game-session.model';
+import { GameSessionEvent, GameSessionEventName } from './events/_event';
+import { GameSessionEventProcessor } from './events/_processor';
+import { EndSessionEvent, EndSessionEventProcessor } from './events/end-session';
+import { GoldUpdateEvent, GoldUpdateEventProcessor } from './events/gold-update';
+import { LocationUpdateEvent, LocationUpdateEventProcessor } from './events/location-update';
+import { StartSessionEvent, StartSessionEventProcessor } from './events/start-session';
+import { GameSession } from './game-session.model';
 
 @Injectable()
 export class SessionTrackerService {
-	public gameSession$$ = new BehaviorSubject<GameSession>(this.initGameSession());
+	public gameSession$$ = new BehaviorSubject<GameSession>(buildInitialGameSession());
+
+	private eventQueue$$ = new BehaviorSubject<GameSessionEvent | null>(null);
+	private eventProcessors: { [eventName in GameSessionEventName]: GameSessionEventProcessor } = {
+		'start-session': new StartSessionEventProcessor(),
+		'end-session': new EndSessionEventProcessor(),
+		'location-update': new LocationUpdateEventProcessor(),
+		'gold-update': new GoldUpdateEventProcessor(),
+	};
 
 	constructor(
 		private readonly eventsEmitter: EventsEmitterService,
@@ -16,153 +30,59 @@ export class SessionTrackerService {
 	) {}
 
 	public async init(): Promise<void> {
-		this.initEventsListeners();
-		this.gameStatus.inGame$$.subscribe((inGame) => {
-			if (inGame) {
-				this.gameSession$$.next(this.initGameSession());
-			} else {
-				this.closeGameSession();
-			}
-		});
-		this.appStore.eventsQueue$$.pipe(filter((e) => e?.eventName === 'reset-session')).subscribe((resetEvent) => {
-			this.gameSession$$.next(this.initGameSession());
-		});
-	}
-
-	private closeGameSession() {
-		// add the exitTimestamp of the last lcation
-		// check for data integrity
-		// save the value in the local storage
-		// + put in place a page on the main window to check the stats
-	}
-
-	private initEventsListeners(): void {
-		this.eventsEmitter.currentLocation$$
-			.pipe(
-				filter((currentLocation) => currentLocation != null),
-				distinctUntilChanged(),
-			)
-			.subscribe((gepLocId) => {
-				console.debug('[session-tracker] new location', gepLocId);
-				const locationId: string = this.toLocationId(gepLocId);
-				let gameSession = this.closeCurrentLocation(this.gameSession$$.value);
-				const locationOverviews = [...gameSession.locationOverviews];
-				let existingLocation: GameSessionLocationOverview | undefined = locationOverviews.find(
-					(loc) => loc.location === locationId,
-				);
-				if (existingLocation == null) {
-					existingLocation = {
-						location: locationId,
-						enterTimestamp: Date.now(),
-						currentGold: this.eventsEmitter.currentGold$$.value,
-						goldEarned: 0,
-					};
-					locationOverviews.push(existingLocation);
-				}
-
-				const currentLocation: GameSessionLocationOverview = {
-					...existingLocation,
-					enterTimestamp: Date.now(),
-					exitTimestamp: undefined,
-				};
-
-				gameSession = {
-					...gameSession,
-					locationOverviews: locationOverviews.map((loc) =>
-						loc.location === locationId ? currentLocation : loc,
-					),
-				};
-				this.gameSession$$.next(gameSession);
-				console.debug('[session-tracker] after new location', this.gameSession$$.value);
-			});
-
-		this.eventsEmitter.currentGold$$.pipe(filter((currentGold) => currentGold != null)).subscribe((currentGold) => {
-			console.debug('[session-tracker] new gold', currentGold, this.gameSession$$.value);
-			let gameSession = this.gameSession$$.value;
-			const location = this.getCurrentLocation(gameSession);
-			if (!location) {
-				console.debug('[session-tracker] no location found for gold', currentGold);
+		this.eventQueue$$.subscribe((event) => {
+			console.debug('[session tracker] processing event', event);
+			if (event == null) {
 				return;
 			}
-
-			const goldEarned = this.computeGoldEarned(currentGold);
-			// if (goldEarned <= 0) {
-			// 	console.debug('[session-tracker] no gold earned', currentGold, location.currentGold, goldEarned);
-			// 	// return;
-			// }
-
-			const updatedLocation = {
-				...location,
-				currentGold: currentGold,
-				goldEarned: location.goldEarned + Math.max(goldEarned, 0),
-			};
-			gameSession = {
-				...gameSession,
-				locationOverviews: gameSession.locationOverviews.map((loc) =>
-					loc.location === updatedLocation.location ? updatedLocation : loc,
-				),
-			};
-			this.gameSession$$.next(gameSession);
-			console.debug('[session-tracker] after new gold', this.gameSession$$.value);
+			const processor = this.eventProcessors[event.eventName];
+			const updatedSession = processor.updateSession(this.gameSession$$.value, event.data);
+			this.gameSession$$.next(updatedSession);
+			console.debug('[session tracker] after processing event', this.gameSession$$.value);
 		});
 
 		this.gameStatus.inGame$$.subscribe((inGame) => {
 			if (!inGame) {
-				const gameSession = this.closeCurrentLocation(this.gameSession$$.value);
-				this.gameSession$$.next(gameSession);
+				console.debug('[session tracker] game ended');
+				this.eventQueue$$.next(new EndSessionEvent());
 			}
+		});
+		this.eventsEmitter.inMatch$$.subscribe((inMatch) => {
+			if (inMatch === false) {
+				console.debug('[session tracker] match ended');
+				this.eventQueue$$.next(new EndSessionEvent());
+			} else {
+				this.eventQueue$$.next(new StartSessionEvent());
+			}
+		});
+		this.appStore.eventsQueue$$.pipe(filter((e) => e?.eventName === 'reset-session')).subscribe((resetEvent) => {
+			this.eventQueue$$.next(new StartSessionEvent());
+		});
+		this.initEventsListeners();
+	}
+
+	private initEventsListeners(): void {
+		this.eventsEmitter.currentLocation$$
+			.pipe(filter((currentLocation) => currentLocation != null))
+			.subscribe((gepLocId) => {
+				// console.debug('[session-tracker] new location', gepLocId);
+				const locationId: string = this.toLocationId(gepLocId);
+				this.eventQueue$$.next(new LocationUpdateEvent(locationId, this.eventsEmitter.currentGold$$.value));
+			});
+
+		this.eventsEmitter.currentGold$$.pipe(filter((currentGold) => currentGold != null)).subscribe((currentGold) => {
+			this.eventQueue$$.next(new GoldUpdateEvent(currentGold));
 		});
 	}
 
 	private toLocationId(gepLocId: string | null): string {
 		return gepLocId as string;
 	}
-
-	private getCurrentLocation(gameSession: GameSession): GameSessionLocationOverview | undefined {
-		return gameSession.locationOverviews.find((l) => l.exitTimestamp == null);
-	}
-
-	private closeCurrentLocation(gameSession: GameSession): GameSession {
-		if (!gameSession?.locationOverviews?.length) {
-			return gameSession;
-		}
-
-		const location = this.getCurrentLocation(gameSession);
-		if (!location) {
-			return gameSession;
-		}
-		const closeLocation = {
-			...location,
-			totalTimeSpentInMillis: (location.totalTimeSpentInMillis ?? 0) + (Date.now() - location.enterTimestamp),
-			exitTimestamp: Date.now(),
-		};
-		return {
-			...gameSession,
-			locationOverviews: [
-				...gameSession.locationOverviews.slice(0, gameSession.locationOverviews.length - 1),
-				closeLocation,
-			],
-		};
-	}
-
-	private computeGoldEarned(currentGold: number | null): number {
-		const gameSession = this.gameSession$$.value;
-		const location = this.getCurrentLocation(gameSession);
-		if (!location) {
-			console.debug('[session-tracker] no location found for gold', currentGold);
-			return 0;
-		}
-		const previousGold = location.currentGold;
-		if (previousGold == null || currentGold == null) {
-			return 0;
-		}
-		return currentGold - previousGold;
-	}
-
-	private initGameSession(): GameSession {
-		return {
-			startTime: Date.now(),
-			locationOverviews: [],
-		};
-	}
 }
+
+export const buildInitialGameSession = (): GameSession => {
+	return {
+		startTime: Date.now(),
+		locationOverviews: [],
+	};
+};
