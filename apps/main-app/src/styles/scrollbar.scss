@@ -1,0 +1,24 @@
+::-webkit-scrollbar {
+	width: 5px;
+	height: 0; // Always hide horizontal scrollbars
+}
+
+::-webkit-scrollbar-track {
+	display: none;
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--color-dark-2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--color-dark-1);
+}
+
+::-webkit-scrollbar-button {
+	display: none;
+}
+
+::-webkit-scrollbar-track-piece {
+	display: none;
+}

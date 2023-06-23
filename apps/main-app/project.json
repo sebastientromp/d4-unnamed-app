@@ -34,6 +34,7 @@
 				},
 				"styles": [
 					"apps/main-app/src/styles/styles.scss",
+					"apps/main-app/src/styles/scrollbar.scss",
 					"apps/main-app/src/styles/cdk-overlay.scss",
 					"apps/main-app/src/styles/fiery-theme.scss"
 				],
