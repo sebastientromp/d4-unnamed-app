@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { GameStatusService } from '@main-app/companion/common';
-import { BehaviorSubject, filter } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, filter, sampleTime } from 'rxjs';
 import { AppStoreService } from '../events/app-store/app-store.service';
 import { EventsEmitterService } from '../events/events-emitter.service';
 import { GameSessionEvent, GameSessionEventName } from './events/_event';
@@ -11,6 +11,7 @@ import { LocationUpdateEvent, LocationUpdateEventProcessor } from './events/loca
 import { ResetSessionEvent, ResetSessionEventProcessor } from './events/reset-session';
 import { StartSessionEvent, StartSessionEventProcessor } from './events/start-session';
 import { GameSession } from './game-session.model';
+import { SessionWidgetControllerService } from './session-widget-controller.service';
 
 @Injectable()
 export class SessionTrackerService {
@@ -29,12 +30,17 @@ export class SessionTrackerService {
 		private readonly eventsEmitter: EventsEmitterService,
 		private readonly gameStatus: GameStatusService,
 		private readonly appStore: AppStoreService,
+		private readonly widgetController: SessionWidgetControllerService,
 	) {}
 
 	public async init(): Promise<void> {
 		this.eventQueue$$.subscribe((event) => {
-			console.debug('[session tracker] processing event', event);
+			console.debug('[session tracker] processing event', event, this.gameSession$$.value);
 			if (event == null) {
+				return;
+			}
+			// Don't process events if widget is not visible or ads are not visible
+			if (this.widgetController.closedByUser$$?.value) {
 				return;
 			}
 			const processor = this.eventProcessors[event.eventName];
@@ -65,7 +71,11 @@ export class SessionTrackerService {
 
 	private initEventsListeners(): void {
 		this.eventsEmitter.currentLocation$$
-			.pipe(filter((currentLocation) => currentLocation != null))
+			.pipe(
+				filter((currentLocation) => currentLocation != null),
+				sampleTime(1000),
+				distinctUntilChanged(),
+			)
 			.subscribe((gepLocId) => {
 				// console.debug('[session-tracker] new location', gepLocId);
 				const locationId: string = this.toLocationId(gepLocId);

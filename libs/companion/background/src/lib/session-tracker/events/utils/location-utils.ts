@@ -16,10 +16,9 @@ export const closeCurrentLocation = (gameSession: GameSession): GameSession => {
 	};
 	return {
 		...gameSession,
-		locationOverviews: [
-			...gameSession.locationOverviews.slice(0, gameSession.locationOverviews.length - 1),
-			closeLocation,
-		],
+		locationOverviews: gameSession.locationOverviews.map((loc) =>
+			loc.location === closeLocation.location ? closeLocation : loc,
+		),
 	};
 };
 

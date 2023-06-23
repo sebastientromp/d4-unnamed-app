@@ -48,45 +48,6 @@
 				"grab_focus_on_desktop": false,
 				"block_top_window_navigation": true
 			},
-			"MainOverlayWindow": {
-				"file": "Files/index.html",
-				"transparent": true,
-				"resizable": true,
-				"show_in_taskbar": true,
-				"size": {
-					"width": 1400,
-					"height": 780
-				},
-				"min_size": {
-					"width": 1400,
-					"height": 780
-				},
-				"block_top_window_navigation": true,
-				"popup_blocker": true,
-				"mute": true
-			},
-			"MainWindow": {
-				"file": "Files/index.html",
-				"transparent": true,
-				"resizable": true,
-				"show_in_taskbar": true,
-				"native_window": true,
-				"use_os_windowing": true,
-				"desktop_only": true,
-				"topmost": false,
-				"disable_hardware_acceleration": true,
-				"size": {
-					"width": 1400,
-					"height": 780
-				},
-				"min_size": {
-					"width": 1400,
-					"height": 780
-				},
-				"block_top_window_navigation": true,
-				"popup_blocker": true,
-				"mute": true
-			},
 			"FullScreenOverlaysWindow": {
 				"file": "Files/index.html",
 				"transparent": true,
@@ -94,6 +55,24 @@
 				"show_in_taskbar": false,
 				"size": {
 					"width": 300,
+					"height": 720
+				},
+				"start_position": {
+					"top": 0,
+					"left": 0
+				},
+				"grab_keyboard_focus": false,
+				"grab_focus_on_desktop": false,
+				"block_top_window_navigation": true,
+				"in_game_only": true
+			},
+			"SessionTrackerSecondScreenWindow": {
+				"file": "Files/index.html",
+				"transparent": true,
+				"resizable": true,
+				"show_in_taskbar": false,
+				"size": {
+					"width": 400,
 					"height": 720
 				},
 				"start_position": {

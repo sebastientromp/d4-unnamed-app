@@ -21,10 +21,12 @@ export class LocationUpdateEventProcessor implements GameSessionEventProcessor {
 			return sessionState;
 		}
 		const gameSession = closeCurrentLocation(sessionState);
+		console.debug('{session-tracker] after closing location', gameSession);
 		const locationOverviews = [...gameSession.locationOverviews];
 		let existingLocation: GameSessionLocationOverview | undefined = locationOverviews.find(
 			(loc) => loc.location === data.locationId,
 		);
+		console.debug('[session-tracker] existing location', existingLocation);
 		if (existingLocation == null) {
 			existingLocation = {
 				location: data.locationId,
@@ -34,18 +36,22 @@ export class LocationUpdateEventProcessor implements GameSessionEventProcessor {
 			};
 			locationOverviews.push(existingLocation);
 		}
+		console.debug('[session-tracker] updated location', existingLocation, locationOverviews);
 
 		const currentLocation: GameSessionLocationOverview = {
 			...existingLocation,
 			enterTimestamp: Date.now(),
 			exitTimestamp: undefined,
 		};
+		console.debug('[session-tracker] updated current location', currentLocation);
 
-		return {
+		const result = {
 			...gameSession,
 			locationOverviews: locationOverviews.map((loc) =>
-				loc.location === data.locationId ? currentLocation : loc,
+				loc.location === currentLocation.location ? currentLocation : loc,
 			),
 		};
+		console.debug('[session-tracker] updated session', result);
+		return result;
 	}
 }
