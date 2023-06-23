@@ -10,7 +10,7 @@
 		"dock_button_title": "D4 Companion",
 		"icon": "IconMouseOver.png",
 		"icon_gray": "IconMouseNormal.png",
-		"launcher_icon": "launcher_icon_2.ico"
+		"launcher_icon": "launcher_icon.ico"
 	},
 	"permissions": [
 		"Logging",
@@ -108,21 +108,15 @@
 		},
 		"game_targeting": {
 			"type": "dedicated",
-			"game_ids": [
-				22700
-			]
+			"game_ids": [22700]
 		},
 		"force_browser": "user",
-		"game_events": [
-			22700
-		],
+		"game_events": [22700],
 		"launch_events": [
 			{
 				"event": "GameLaunch",
 				"event_data": {
-					"game_ids": [
-						22700
-					]
+					"game_ids": [22700]
 				},
 				"start_minimized": false
 			}
