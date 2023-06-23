@@ -138,10 +138,10 @@
 			]
 		},
 		"hotkeys": {
-			"live-map": {
-				"title": "Show transparent map",
+			"session-tracker": {
+				"title": "Show/hide the session tracker",
 				"action-type": "custom",
-				"default": "Alt+H",
+				"default": "F9",
 				"passthrough": true
 			}
 		},
