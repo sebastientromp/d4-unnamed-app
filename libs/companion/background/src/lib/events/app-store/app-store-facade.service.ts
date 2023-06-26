@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GameStatusService } from '@main-app/companion/common';
+import { GameStatusService, Preferences, PreferencesService } from '@main-app/companion/common';
 import { BehaviorSubject } from 'rxjs';
 import { GameStateService } from '../../game-state/game-state.service';
 import { GameSession } from '../../session-tracker/game-session.model';
@@ -10,6 +10,9 @@ import { AppEventName, AppStoreService } from './app-store.service';
 
 @Injectable()
 export class AppStoreFacadeService {
+	public eventBus$$ = new BehaviorSubject<StoreEvent | null>(null);
+
+	public prefs$$ = new BehaviorSubject<Preferences | null>(null);
 	public inGame$$ = new BehaviorSubject<boolean>(false);
 	public inMatch$$ = new BehaviorSubject<boolean | null>(null);
 	public location$$ = new BehaviorSubject<string | null>(null);
@@ -27,9 +30,14 @@ export class AppStoreFacadeService {
 		private readonly sessionTracker: SessionTrackerService,
 		private readonly sessionWidgetController: SessionWidgetControllerService,
 		private readonly appStore: AppStoreService,
+		private readonly prefs: PreferencesService,
 	) {
 		(window as any)['appStore'] = this;
 		this.init();
+	}
+
+	public updatePref(field: keyof Preferences, value: any) {
+		this.prefs.setValue(field, value);
 	}
 
 	public send(eventName: AppEventName) {
@@ -44,6 +52,7 @@ export class AppStoreFacadeService {
 		this.currentGold$$ = this.eventsEmitter.currentGold$$;
 		this.gameSession$$ = this.sessionTracker.gameSession$$ as BehaviorSubject<GameSession | null>;
 		this.sessionWidgetClosedByUser$$ = this.sessionWidgetController.closedByUser$$;
+		this.prefs$$ = this.prefs.prefs$$;
 
 		this.initialized = true;
 	}
@@ -62,3 +71,10 @@ export class AppStoreFacadeService {
 		});
 	}
 }
+
+export interface StoreEvent {
+	readonly name: StoreEventName;
+	readonly data: any;
+}
+
+export type StoreEventName = 'session-tracker-visibility-changed';

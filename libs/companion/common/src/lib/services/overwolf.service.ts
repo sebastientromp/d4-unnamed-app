@@ -6,8 +6,9 @@ const NO_AD_PLAN = 13;
 @Injectable()
 export class OverwolfService {
 	public static CONTROLLER = 'BackgroundWindow';
-	public static MAIN = 'MainWindow';
-	public static MAIN_OVERLAY = 'MainOverlayWindow';
+	public static SESSION_TRACKER = 'SessionTrackerWindow';
+	// public static MAIN = 'MainWindow';
+	// public static MAIN_OVERLAY = 'MainOverlayWindow';
 	public static OVERLAY = 'FullScreenOverlaysWindow';
 
 	public async getCurrentWindow(): Promise<overwolf.windows.WindowInfo> {
@@ -242,6 +243,14 @@ export class OverwolfService {
 					resolve(!hideAds);
 				},
 			);
+		});
+	}
+
+	public async isWindowVisibleToUser(): Promise<'hidden' | 'full' | 'partial'> {
+		return new Promise<'hidden' | 'full' | 'partial'>((resolve) => {
+			overwolf.windows.isWindowVisibleToUser((result) => {
+				resolve(result.visible);
+			});
 		});
 	}
 }

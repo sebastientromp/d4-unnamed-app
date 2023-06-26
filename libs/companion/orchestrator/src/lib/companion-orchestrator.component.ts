@@ -9,7 +9,7 @@ import {
 import { Title } from '@angular/platform-browser';
 import { OverwolfService } from '@main-app/companion/common';
 import { Observable, Subject, from } from 'rxjs';
-import { distinctUntilChanged, map, tap } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 
 @Component({
 	selector: 'main-app-companion-orchestrator',
@@ -19,6 +19,9 @@ import { distinctUntilChanged, map, tap } from 'rxjs/operators';
 			<main-app-companion-background *ngSwitchCase="'BackgroundWindow'"></main-app-companion-background>
 			<main-app-companion-main *ngSwitchCase="'MainWindow'"></main-app-companion-main>
 			<main-app-companion-overlay *ngSwitchCase="'FullScreenOverlaysWindow'"></main-app-companion-overlay>
+			<session-tracker-standalone-container
+				*ngSwitchCase="'SessionTrackerWindow'"
+			></session-tracker-standalone-container>
 		</ng-container>
 	</ng-container>`,
 	changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,7 +46,6 @@ export class CompanionOrchestratorComponent implements AfterContentInit, OnDestr
 	ngAfterContentInit(): void {
 		console.debug('init orchestrator');
 		this.currentWindowName$ = from(this.ow.getCurrentWindow()).pipe(
-			tap((currentWindow) => console.debug('current window', currentWindow)),
 			map((currentWindow) => this.mapWindowName(currentWindow?.name)),
 			distinctUntilChanged(),
 		);
@@ -67,8 +69,8 @@ export class CompanionOrchestratorComponent implements AfterContentInit, OnDestr
 
 	private mapWindowName(name: string | undefined): string {
 		switch (name) {
-			case OverwolfService.MAIN_OVERLAY:
-				return OverwolfService.MAIN;
+			// case OverwolfService.MAIN_OVERLAY:
+			// 	return OverwolfService.MAIN;
 			default:
 				return name ?? 'Unknown window';
 		}

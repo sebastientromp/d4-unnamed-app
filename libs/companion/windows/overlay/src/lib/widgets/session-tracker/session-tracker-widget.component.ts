@@ -1,40 +1,49 @@
 import { AfterContentInit, ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
 import { AppStoreUiFacadeService, GameSession, GameSessionLocationOverview } from '@main-app/companion/background';
-import { AbstractSubscriptionComponent, AdService } from '@main-app/companion/common';
+import { AbstractSubscriptionComponent, AdService, OverwolfService } from '@main-app/companion/common';
 import { Observable, filter, map, tap } from 'rxjs';
 
 @Component({
 	selector: 'session-tracker-widget',
 	styleUrls: ['./session-tracker-widget.component.scss'],
 	template: `<div class="session-tracker">
-		<div class="background"></div>
-		<div class="controls">
-			<div class="title">Session recap</div>
-			<div class="buttons">
-				<control-reset
-					class="button reset"
-					[helpTooltip]="'Reset session'"
-					(requestReset)="reset()"
-				></control-reset>
-				<control-close class="button close" (requestClose)="close()"></control-close>
+		<div class="content">
+			<div class="background"></div>
+			<div class="controls">
+				<div class="title">Session recap</div>
+				<div class="buttons">
+					<preference-toggle
+						field="sessionTrackerOverlay"
+						[label]="'Set overlay'"
+						[helpTooltip]="
+							'Bind the lottery window to the game window, so that it is always visible. You should use this if the lottery is on the same screen as the game'
+						"
+					></preference-toggle>
+					<control-reset
+						class="button reset"
+						[helpTooltip]="'Reset session'"
+						(requestReset)="reset()"
+					></control-reset>
+					<control-close class="button close" (requestClose)="close()"></control-close>
+				</div>
 			</div>
-		</div>
-		<div class="session-recap">
-			<session-tracker-section-content class="overview" [section]="overview$ | async">
-			</session-tracker-section-content>
-			<div class="details">
-				<div class="title">Zones</div>
-				<div class="sections">
-					<session-tracker-section-content
-						class="section"
-						*ngFor="let section of sections$ | async; trackBy: trackBySection"
-						[section]="section"
-					>
-					</session-tracker-section-content>
+			<div class="session-recap">
+				<session-tracker-section-content class="overview" [section]="overview$ | async">
+				</session-tracker-section-content>
+				<div class="details">
+					<div class="title">Zones</div>
+					<div class="sections">
+						<session-tracker-section-content
+							class="section"
+							*ngFor="let section of sections$ | async; trackBy: trackBySection"
+							[section]="section"
+						>
+						</session-tracker-section-content>
+					</div>
 				</div>
 			</div>
 		</div>
-		<single-ad class="ad" *ngIf="showAds$ | async"></single-ad>
+		<single-ad class="ad" *ngIf="showAds$ | async" (adVisibility)="onAdVisibilityChanged($event)"></single-ad>
 	</div>`,
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -47,6 +56,7 @@ export class SessionTrackerWidgetComponent extends AbstractSubscriptionComponent
 		protected override readonly cdr: ChangeDetectorRef,
 		private readonly store: AppStoreUiFacadeService,
 		private readonly adService: AdService,
+		private readonly ow: OverwolfService,
 	) {
 		super(cdr);
 	}
@@ -87,6 +97,9 @@ export class SessionTrackerWidgetComponent extends AbstractSubscriptionComponent
 			tap((data) => console.debug('[session-tracker] overview data', data)),
 		);
 		this.showAds$ = this.adService.showAds$$.asObservable();
+
+		const window = await this.ow.getCurrentWindow();
+		console.debug('[session-tracker] window', window);
 	}
 
 	close(): void {
@@ -100,5 +113,9 @@ export class SessionTrackerWidgetComponent extends AbstractSubscriptionComponent
 
 	trackBySection(index: number, section: GameSessionLocationOverview): string {
 		return section.location;
+	}
+
+	onAdVisibilityChanged(visible: 'hidden' | 'partial' | 'full') {
+		this.store.eventBus$$.next({ name: 'session-tracker-visibility-changed', data: { visible } });
 	}
 }

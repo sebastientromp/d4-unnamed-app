@@ -1,7 +1,16 @@
 .session-tracker {
 	width: 400px;
-	height: fit-content;
+	height: 100%;
 	border-radius: 15px;
+	display: flex;
+	flex-direction: column;
+
+	.content {
+		display: flex;
+		flex-direction: column;
+		position: relative;
+		flex-grow: 1;
+	}
 
 	.background {
 		position: absolute;
@@ -24,6 +33,11 @@
 			margin-left: auto;
 			align-items: center;
 			display: flex;
+			color: var(--color-common-1);
+
+			preference-toggle {
+				margin-right: 15px;
+			}
 		}
 	}
 
@@ -60,4 +74,6 @@
 .ad {
 	width: 400px;
 	height: 300px;
+	margin-top: auto;
+	margin-bottom: 60px;
 }

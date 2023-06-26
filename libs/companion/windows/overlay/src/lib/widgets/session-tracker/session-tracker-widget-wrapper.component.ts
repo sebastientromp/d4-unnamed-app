@@ -43,9 +43,16 @@ export class SessionTrackerWidgetWrapperComponent extends AbstractWidgetWrapperC
 	}
 
 	async ngAfterContentInit(): Promise<void> {
-		this.showWidget$ = combineLatest([this.store.inMatch$$(), this.store.sessionWidgetClosedByUser$$()]).pipe(
+		this.showWidget$ = combineLatest([
+			this.store.inMatch$$(),
+			this.store.sessionWidgetClosedByUser$$(),
+			this.store.prefs$$(),
+		]).pipe(
 			tap((info) => console.debug('show widget?', info)),
-			this.mapData(([inMatch, sessionWidgetClosedByUser]) => !sessionWidgetClosedByUser && !!inMatch),
+			this.mapData(
+				([inMatch, sessionWidgetClosedByUser, prefs]) =>
+					!sessionWidgetClosedByUser && !!inMatch && !!prefs?.sessionTrackerOverlay,
+			),
 			tap((info) => console.debug('will show widget?', info)),
 			this.handleReposition(),
 		);

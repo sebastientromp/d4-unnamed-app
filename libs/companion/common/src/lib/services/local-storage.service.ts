@@ -16,4 +16,5 @@ export class LocalStorageService {
 
 export enum LocalStorageKey {
 	WIDGET_POSITIONS = 'widget-positions',
+	PREFERENCES = 'preferences',
 }

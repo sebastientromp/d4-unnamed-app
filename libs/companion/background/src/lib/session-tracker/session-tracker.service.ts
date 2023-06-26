@@ -40,7 +40,8 @@ export class SessionTrackerService {
 				return;
 			}
 			// Don't process events if widget is not visible or ads are not visible
-			if (this.widgetController.closedByUser$$?.value) {
+			if (!this.widgetController.shouldTrack$$?.value) {
+				console.debug('[session tracker] widget not visible, not processing event', event);
 				return;
 			}
 			const processor = this.eventProcessors[event.eventName];

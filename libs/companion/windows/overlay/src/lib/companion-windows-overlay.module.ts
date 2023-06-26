@@ -5,6 +5,7 @@ import { CompanionBackgroundModule } from '@main-app/companion/background';
 import { CompanionCommonModule } from '@main-app/companion/common';
 import { CompanionWindowsCommonModule } from '@main-app/companion/windows/common';
 import { CompanionOverlayComponent } from './companion-overlay.component';
+import { SessionTrackerOverlayStandaloneComponent } from './standalone/session-tracker-standalone-container.component';
 import { SessionTrackerSectionContentComponent } from './widgets/session-tracker/session-tracker-section-content.component';
 import { SessionTrackerWidgetWrapperComponent } from './widgets/session-tracker/session-tracker-widget-wrapper.component';
 import { SessionTrackerWidgetComponent } from './widgets/session-tracker/session-tracker-widget.component';
@@ -14,6 +15,7 @@ const components = [
 	SessionTrackerWidgetWrapperComponent,
 	SessionTrackerWidgetComponent,
 	SessionTrackerSectionContentComponent,
+	SessionTrackerOverlayStandaloneComponent,
 ];
 
 @NgModule({
