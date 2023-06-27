@@ -5,6 +5,7 @@ export interface GameSession {
 
 export interface GameSessionLocationOverview {
 	readonly location: string;
+	readonly locationName: string;
 	readonly enterTimestamp: number;
 	readonly exitTimestamp?: number;
 	readonly totalTimeSpentInMillis?: number;

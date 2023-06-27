@@ -83,6 +83,7 @@ export class SessionTrackerWidgetComponent extends AbstractSubscriptionComponent
 			this.mapData((session) => {
 				const result = {
 					location: 'overview',
+					locationName: 'Overview',
 					goldEarned: session.locationOverviews.reduce((acc, loc) => acc + loc.goldEarned, 0),
 					totalTimeSpentInMillis: session.locationOverviews.reduce(
 						(acc, loc) => acc + (loc.totalTimeSpentInMillis ?? 0),

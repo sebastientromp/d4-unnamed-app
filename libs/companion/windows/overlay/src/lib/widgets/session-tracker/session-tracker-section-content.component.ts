@@ -42,7 +42,7 @@ export class SessionTrackerSectionContentComponent
 		}
 
 		this.isOverview = value.location === 'overview';
-		this.title = value.location;
+		this.title = value.locationName;
 		this.goldEarned = value.goldEarned;
 		if (this.durationInterval) {
 			clearInterval(this.durationInterval);

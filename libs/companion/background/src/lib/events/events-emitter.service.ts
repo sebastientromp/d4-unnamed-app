@@ -3,7 +3,6 @@ import { OverwolfService } from '@main-app/companion/common';
 import { BehaviorSubject } from 'rxjs';
 import { MockEventsService } from './mock-events.service';
 
-import territories from '../data/territories.json';
 // import '@overwolf/types';
 
 @Injectable()
@@ -86,34 +85,34 @@ export class EventsEmitterService {
 		}
 	}
 
-	private buildRegion(data: { x: number; y: number; z: number }): string | null {
-		const territory = getTerritoryByPoint({ x: data.x, y: data.y });
-		if (territory) {
-			return (territory?.name || territory?.id) ?? 'Unknown';
-		}
-		console.debug('[events-emitter] could not find territory for', data);
-		return null;
-	}
+	// private buildRegion(data: { x: number; y: number; z: number }): string | null {
+	// 	const territory = getTerritoryByPoint({ x: data.x, y: data.y });
+	// 	if (territory) {
+	// 		return (territory?.name || territory?.id) ?? 'Unknown';
+	// 	}
+	// 	console.debug('[events-emitter] could not find territory for', data);
+	// 	return null;
+	// }
 }
 
-export const isPointInsidePolygon = (point: { x: number; y: number }, polygon: readonly { x: number; y: number }[]) => {
-	const x = point.x;
-	const y = point.y;
+// export const isPointInsidePolygon = (point: { x: number; y: number }, polygon: readonly { x: number; y: number }[]) => {
+// 	const x = point.x;
+// 	const y = point.y;
 
-	let inside = false;
-	for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-		const xi = polygon[i].x,
-			yi = polygon[i].y;
-		const xj = polygon[j].x,
-			yj = polygon[j].y;
+// 	let inside = false;
+// 	for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+// 		const xi = polygon[i].x,
+// 			yi = polygon[i].y;
+// 		const xj = polygon[j].x,
+// 			yj = polygon[j].y;
 
-		const intersect = yi > y != yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
-		if (intersect) inside = !inside;
-	}
+// 		const intersect = yi > y != yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
+// 		if (intersect) inside = !inside;
+// 	}
 
-	return inside;
-};
+// 	return inside;
+// };
 
-export const getTerritoryByPoint = (point: { x: number; y: number }) => {
-	return territories.find((territory) => isPointInsidePolygon(point, territory.points));
-};
+// export const getTerritoryByPoint = (point: { x: number; y: number }) => {
+// 	return territories.find((territory) => isPointInsidePolygon(point, territory.points));
+// };

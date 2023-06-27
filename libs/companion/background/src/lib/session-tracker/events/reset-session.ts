@@ -22,6 +22,7 @@ export class ResetSessionEventProcessor implements GameSessionEventProcessor {
 					enterTimestamp: Date.now(),
 					totalTimeSpentInMillis: undefined,
 					location: currentLocation.location,
+					locationName: currentLocation.locationName,
 					currentGold: currentLocation.currentGold,
 					goldEarned: 0,
 				},
