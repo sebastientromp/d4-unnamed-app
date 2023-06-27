@@ -19,6 +19,7 @@ export class AppStoreFacadeService {
 	// public totalTimeSpentInMatchInMiilis$$ = new BehaviorSubject<number>(0);
 	public currentGold$$ = new BehaviorSubject<number | null>(null);
 	public gameSession$$ = new BehaviorSubject<GameSession | null>(null);
+	public shouldTrackSession$$ = new BehaviorSubject<boolean>(false);
 	public sessionWidgetClosedByUser$$ = new BehaviorSubject<boolean>(false);
 
 	private initialized = false;
@@ -51,6 +52,7 @@ export class AppStoreFacadeService {
 		// this.totalTimeSpentInMatchInMiilis$$ = this.gameState.totalTimeSpentInMatchInMillis$$;
 		this.currentGold$$ = this.eventsEmitter.currentGold$$;
 		this.gameSession$$ = this.sessionTracker.gameSession$$ as BehaviorSubject<GameSession | null>;
+		this.shouldTrackSession$$ = this.sessionWidgetController.shouldTrack$$;
 		this.sessionWidgetClosedByUser$$ = this.sessionWidgetController.closedByUser$$;
 		this.prefs$$ = this.prefs.prefs$$;
 

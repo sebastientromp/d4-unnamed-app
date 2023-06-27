@@ -25,9 +25,9 @@ export class EventsEmitterService {
 			this.processNewGepInfoUpdates(event);
 		});
 		overwolf.games.events.getInfo((event) => {
-			this.processGepGameInfo(event);
+			this.processGepGameInfo(event.res);
 		});
-		await this.ow.setRequiredFeatures(['match_info', 'location']);
+		await this.ow.setRequiredFeatures(['match_info', 'location', 'game_info', 'me', 'gep_internal']);
 
 		this.mockEvents.events$$.subscribe((events) => {
 			for (const event of events) {
@@ -37,7 +37,7 @@ export class EventsEmitterService {
 	}
 
 	private processNewGepEvent(event: overwolf.games.events.GameEvent) {
-		console.debug('[events-emitter] received event', event);
+		console.debug('[events-emitter] received event', event.name, event);
 		switch (event.name) {
 			case 'match_start':
 				this.inMatch$$.next(true);
@@ -45,49 +45,44 @@ export class EventsEmitterService {
 			case 'match_end':
 				this.inMatch$$.next(false);
 				break;
-			case 'current_gold':
-				this.currentGold$$.next(parseInt(event.data));
-				break;
-			case 'current_location':
-				// Not sent
-				break;
 		}
 	}
 
 	private processNewGepInfoUpdates(event: any) {
-		console.debug('[events-emitter] received info update', event);
-		const matchInfo = event?.info?.match_info;
-		if (!matchInfo) {
-			return;
-		}
-
-		if (matchInfo.location) {
-			const location: { x: number; y: number; z: number } = JSON.parse(matchInfo.location);
-			const region = this.buildRegion(location);
-			// The order is important, as we want the "session start" event to arrive first
-			console.debug('processing location', matchInfo.location, region, this.inMatch$$.value);
-			if (this.inMatch$$.value == null) {
-				this.inMatch$$.next(region != null);
-			}
-			this.currentLocation$$.next(region);
-			// Only used initially, if we start the app in a match
-		}
+		console.debug('[events-emitter] received info update', event.feature, event);
+		const info = event?.info;
+		this.processGepGameInfo(info);
 	}
 
 	private processGepGameInfo(info: any) {
-		console.debug('[events-emitter] received info', info);
-		const matchInfo = info?.res?.match_info;
-		if (!matchInfo) {
-			return;
+		const matchInfo = info?.match_info;
+		if (matchInfo?.location) {
+			// const location: { x: number; y: number; z: number } = JSON.parse(matchInfo.location);
+			// const region = this.buildRegion(location);
+			// // The order is important, as we want the "session start" event to arrive first
+			// console.debug('processing location', matchInfo.location, region, this.inMatch$$.value);
+			// if (this.inMatch$$.value == null) {
+			// 	this.inMatch$$.next(region != null);
+			// }
+			// this.currentLocation$$.next(region);
 		}
 
-		if (matchInfo.location) {
-			const location: { x: number; y: number; z: number } = JSON.parse(matchInfo.location);
-			const region = this.buildRegion(location);
-			if (this.inMatch$$.value == null) {
-				this.inMatch$$.next(region != null);
-			}
-			this.currentLocation$$.next(region);
+		if (matchInfo?.map) {
+			const mapObj: { area: number; territory: number } = JSON.parse(matchInfo.map);
+			this.inMatch$$.next(!!mapObj.area);
+			this.currentLocation$$.next('' + mapObj.area);
+		}
+
+		if (info?.gold) {
+			this.currentGold$$.next(parseInt(info.gold.gold));
+		}
+
+		if (info?.character) {
+			const character: { name?: string; level?: number; class?: number } = info.character;
+		}
+
+		if (info?.game_info) {
+			const gameInfo: { battlenet_tag?: string } = info.game_info;
 		}
 	}
 

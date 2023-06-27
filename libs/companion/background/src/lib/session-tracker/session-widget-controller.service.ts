@@ -42,16 +42,20 @@ export class SessionWidgetControllerService {
 			this.closedByUser$$.next(!this.closedByUser$$.value);
 		});
 
-		combineLatest([this.store.inMatch$$(), this.store.prefs$$()])
+		combineLatest([this.store.inMatch$$(), this.store.prefs$$(), this.closedByUser$$])
 			.pipe(
-				map(([inMatch, prefs]) => ({ inMatch: inMatch, useOverlay: prefs?.sessionTrackerOverlay })),
+				map(([inMatch, prefs, closedByUser]) => ({
+					inMatch: inMatch,
+					useOverlay: prefs?.sessionTrackerOverlay,
+					closedByUser: closedByUser,
+				})),
 				tap((info) => console.debug('[session-tracker-widget] should show window?', info)),
 				distinctUntilChanged(),
 			)
 			.subscribe(async (info) => {
 				console.debug('[session-tracker-widget] setting visibility', info);
 				const sessionTrackerWindow = await this.ow.obtainDeclaredWindow(OverwolfService.SESSION_TRACKER);
-				if (!info.inMatch || info.useOverlay) {
+				if (!info.inMatch || info.useOverlay || info.closedByUser) {
 					this.ow.closeWindow(sessionTrackerWindow.id);
 					return;
 				}

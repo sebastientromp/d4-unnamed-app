@@ -15,12 +15,14 @@ export class AppStoreUiFacadeService {
 	}
 
 	public prefs$$ = () => this.store.prefs$$;
+	public gameSession$$ = () => this.store.gameSession$$;
+	public shouldTrackSession$$ = () => this.store.shouldTrackSession$$;
+
 	public inGame$$ = () => this.store.inGame$$;
 	public inMatch$$ = () => this.store.inMatch$$;
 	public location$$ = () => this.store.location$$;
 	// public totalTimeSpentInMatchInMiilis$$ = () => this.store.totalTimeSpentInMatchInMiilis$$;
 	public currentGold$$ = () => this.store.currentGold$$;
-	public gameSession$$ = () => this.store.gameSession$$;
 	public sessionWidgetClosedByUser$$ = () => this.store.sessionWidgetClosedByUser$$;
 
 	public updatePref(field: keyof Preferences, value: any) {
